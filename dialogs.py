@@ -156,7 +156,6 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         ox_y2.setRange(-1e9, 1e9)
         ox_y2.setDecimals(3)
         ox_y2.setValue(self.current_settings['oxidation'].get('y2', 0))
-        self.ox_label = QtWidgets.QLabel(self.get_oxidation_label_text())
         ox_layout = QtWidgets.QHBoxLayout()
         ox_layout.addWidget(QtWidgets.QLabel("x1:"))
         ox_layout.addWidget(ox_x1)
@@ -169,9 +168,9 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         layout.addRow("Utlenienie:", ox_layout)
         self.ox_preview_label = QtWidgets.QLabel("Podgląd wartości: Punkty nie są jeszcze zainicjalizowane")
         layout.addRow(self.ox_preview_label)
-        self.ox_x1 = ox_x1;
-        self.ox_y1 = ox_y1;
-        self.ox_x2 = ox_x2;
+        self.ox_x1 = ox_x1
+        self.ox_y1 = ox_y1
+        self.ox_x2 = ox_x2
         self.ox_y2 = ox_y2
 
         # Redukcja
@@ -191,7 +190,6 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         red_y2.setRange(-1e9, 1e9)
         red_y2.setDecimals(3)
         red_y2.setValue(self.current_settings['reduction'].get('y2', 0))
-        self.red_label = QtWidgets.QLabel(self.get_reduction_label_text())
         red_layout = QtWidgets.QHBoxLayout()
         red_layout.addWidget(QtWidgets.QLabel("x1:"))
         red_layout.addWidget(red_x1)
@@ -202,12 +200,11 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         red_layout.addWidget(QtWidgets.QLabel("y2:"))
         red_layout.addWidget(red_y2)
         layout.addRow("Redukcja:", red_layout)
-        layout.addRow("Podgląd wartości:", self.red_label)
         self.red_preview_label = QtWidgets.QLabel("Podgląd wartości: Punkty nie są jeszcze zainicjalizowane")
         layout.addRow(self.red_preview_label)
-        self.red_x1 = red_x1;
-        self.red_y1 = red_y1;
-        self.red_x2 = red_x2;
+        self.red_x1 = red_x1
+        self.red_y1 = red_y1
+        self.red_x2 = red_x2
         self.red_y2 = red_y2
 
         # Połączenia sygnałów do aktualizacji wartości i podglądu
@@ -253,8 +250,6 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
             else:
                 y1_spin.setValue(init['y1'] + slope * (new_x1 - init['x1']))
                 y2_spin.setValue(init['y2'] + slope * (new_x2 - init['x1']))
-        self.ox_label.setText(self.get_oxidation_label_text())
-        self.red_label.setText(self.get_reduction_label_text())
 
     def on_apply(self):
         """
@@ -279,18 +274,6 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
             'reduction': new_settings['reduction'].copy()
         }
         self.update_preview_labels()
-
-    def get_oxidation_label_text(self):
-        """Zwraca sformatowany tekst prezentujący ustawienia linii bazowej dla utlenienia."""
-        if not hasattr(self, 'ox_x1'):
-            return "Punkty nie są jeszcze zainicjalizowane"
-        return f"x1: {self.ox_x1.value():.3f}, y1: {self.ox_y1.value():.3f} | x2: {self.ox_x2.value():.3f}, y2: {self.ox_y2.value():.3f}"
-
-    def get_reduction_label_text(self):
-        """Zwraca sformatowany tekst prezentujący ustawienia linii bazowej dla redukcji."""
-        if not hasattr(self, 'red_x1'):
-            return "Punkty nie są jeszcze zainicjalizowane"
-        return f"x1: {self.red_x1.value():.3f}, y1: {self.red_y1.value():.3f} | x2: {self.red_x2.value():.3f}, y2: {self.red_y2.value():.3f}"
 
     def accept(self):
         """Przy zatwierdzaniu zmian stosuje ustawienia oraz zamyka dialog."""
