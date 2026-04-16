@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import analysis; import dialogs; import export; import numpy as np; s = analysis.CalibrationSettings\\(electrode_area=0.071, normalize_by_area=True\\); y, u = analysis.apply_calibration\\(np.array\\([168.175]\\), s\\); print\\(f'peak={y[0]:.6f} unit={u}'\\)\")",
+      "Read(//c/Users/Ariva/AppData/Local/Programs/Python/**)",
+      "Bash(py -c \"import numpy; print\\(numpy.__version__\\)\")",
+      "Bash(py -c \"import analysis; import numpy as np; s = analysis.CalibrationSettings\\(electrode_area=0.071, normalize_by_area=True\\); y, u = analysis.apply_calibration\\(np.array\\([168.175]\\), s\\); print\\(f'peak={y[0]:.6f} unit={u}'\\)\")",
+      "Bash(py -c \"import sys, io; sys.stdout = io.TextIOWrapper\\(sys.stdout.buffer, encoding='utf-8'\\); import analysis; import numpy as np; s = analysis.CalibrationSettings\\(electrode_area=0.071, normalize_by_area=True\\); y, u = analysis.apply_calibration\\(np.array\\([168.175]\\), s\\); print\\(f'peak={y[0]:.6f} unit={u}'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('main_window.py', encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(py -c \"import ast; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\)\\) for f in ['analysis.py','dialogs.py','main_window.py','export.py']]; print\\('syntax OK'\\)\")",
+      "Bash(py -c ' *)"
+    ]
+  }
+}

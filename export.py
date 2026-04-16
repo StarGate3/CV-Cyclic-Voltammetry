@@ -7,7 +7,8 @@ import pandas as pd
 def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
                     deriv_y1, deriv_y2, second_deriv_y1, second_deriv_y2,
                     table_data, deriv_intersections, second_deriv_intersections,
-                    e_half_value, measurement_type):
+                    e_half_value, measurement_type,
+                    calibration_settings=None, calibration_unit_label="μA"):
     """
     Write CV analysis results to an .xlsx file with an embedded line chart.
 
@@ -38,6 +39,21 @@ def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
     writer = pd.ExcelWriter(filename, engine='xlsxwriter')
     df.to_excel(writer, sheet_name="Dane", index=False)
     df_params.to_excel(writer, sheet_name="Parametry", index=False)
+
+    if calibration_settings is not None:
+        params_sheet = writer.sheets["Parametry"]
+        start_row = len(df_params) + 2
+        params_sheet.write(start_row, 0, "Kalibracja")
+        params_sheet.write(start_row + 1, 0, "electrode_area [cm²]")
+        params_sheet.write(start_row + 1, 1, calibration_settings.electrode_area)
+        params_sheet.write(start_row + 2, 0, "concentration [mM]")
+        params_sheet.write(start_row + 2, 1, calibration_settings.concentration)
+        params_sheet.write(start_row + 3, 0, "normalize_by_area")
+        params_sheet.write(start_row + 3, 1, bool(calibration_settings.normalize_by_area))
+        params_sheet.write(start_row + 4, 0, "normalize_by_concentration")
+        params_sheet.write(start_row + 4, 1, bool(calibration_settings.normalize_by_concentration))
+        params_sheet.write(start_row + 5, 0, "jednostka wynikowa")
+        params_sheet.write(start_row + 5, 1, calibration_unit_label)
 
     if deriv_intersections:
         pd.DataFrame(deriv_intersections, columns=["x", "y"]).to_excel(
@@ -87,7 +103,7 @@ def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
         'crossing': 'min' if measurement_type == 0 else 'max',
     })
     chart.set_y_axis({
-        'name': 'I [μA]',
+        'name': f'I [{calibration_unit_label}]',
         'name_font': {'name': 'Verdana', 'bold': True, 'size': 14},
         'num_font': {'name': 'Calibri', 'size': 10},
     })

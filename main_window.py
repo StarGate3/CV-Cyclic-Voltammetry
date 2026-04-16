@@ -9,9 +9,11 @@ import numpy as np
 from PyQt6 import QtWidgets, QtGui, QtCore
 import pyqtgraph as pg
 
-from dialogs import AxisSettingsDialog, BaselineSettingsDialog, PeakDetectionDialog
+from dialogs import (AxisSettingsDialog, BaselineSettingsDialog, PeakDetectionDialog,
+                     CalibrationDialog, CurveFittingDialog)
 from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
+from analysis import CalibrationSettings
 import export as _export_module
 
 
@@ -39,6 +41,8 @@ class MainWindow(QtWidgets.QMainWindow):
             'y_max': 10,
             'font': QtGui.QFont("Arial", 12)
         }
+        self.calibration_settings = CalibrationSettings()
+        self.current_unit_label = "μA"
         self.update_axis_settings()
         self.baseline_settings = {
             'oxidation': {'x1': 0, 'y1': 0, 'x2': 10, 'y2': 0},
@@ -77,6 +81,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deriv_intersections = None
         self.second_deriv_intersections = None
         self.auto_peak_scatter_items = []
+        self._curve_fit_dialog = None
         self.smoothingCheckBox.stateChanged.connect(self.update_plot_from_raw_data)
         # Only redraw when smoothing is actually active (QUAL-04).
         self.windowSpinBox.valueChanged.connect(
@@ -91,6 +96,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resultsTable.setHorizontalHeaderLabels(["Typ", "x_peak", "y_peak", "Baseline", "H/D"])
         self.centralLayout.addWidget(self.resultsTable)
         self.setStatusBar(QtWidgets.QStatusBar())
+        self.calibration_status_label = QtWidgets.QLabel("")
+        self.statusBar().addPermanentWidget(self.calibration_status_label)
         self.proxy = pg.SignalProxy(self.plot_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
         self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_click)
 
@@ -117,12 +124,18 @@ class MainWindow(QtWidgets.QMainWindow):
         btn_axis_settings = QtWidgets.QPushButton("Edytuj ustawienia osi")
         btn_axis_settings.clicked.connect(self.edit_axis_settings)
         row.addWidget(btn_axis_settings)
+        btn_calibration = QtWidgets.QPushButton("Kalibracja jednostek")
+        btn_calibration.clicked.connect(self.edit_calibration_settings)
+        row.addWidget(btn_calibration)
         btn_export = QtWidgets.QPushButton("Eksport do Excela")
         btn_export.clicked.connect(self.export_to_excel)
         row.addWidget(btn_export)
         btn_help = QtWidgets.QPushButton("Help")
         btn_help.clicked.connect(self.show_help)
         row.addWidget(btn_help)
+        btn_theory = QtWidgets.QPushButton("Teoria")
+        btn_theory.clicked.connect(self.show_theory)
+        row.addWidget(btn_theory)
         btn_about = QtWidgets.QPushButton("About")
         btn_about.clicked.connect(self.show_about)
         row.addWidget(btn_about)
@@ -147,6 +160,9 @@ class MainWindow(QtWidgets.QMainWindow):
         btn_second_derivative = QtWidgets.QPushButton("Oblicz drugą pochodną")
         btn_second_derivative.clicked.connect(self.compute_second_derivative)
         row.addWidget(btn_second_derivative)
+        btn_curve_fit = QtWidgets.QPushButton("Dopasowanie krzywej")
+        btn_curve_fit.clicked.connect(self.open_curve_fitting_dialog)
+        row.addWidget(btn_curve_fit)
         self.combo_theme = QtWidgets.QComboBox()
         self.combo_theme.addItems(["Ciemny", "Jasny"])
         for i in range(self.combo_theme.count()):
@@ -248,6 +264,10 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.y1 = self.raw_y1.copy()
             self.y2 = self.raw_y2.copy()
+        self.y1, self.current_unit_label = analysis.apply_calibration(self.y1, self.calibration_settings)
+        self.y2, _ = analysis.apply_calibration(self.y2, self.calibration_settings)
+        self.axis_settings['y_label'] = f"Prąd [{self.current_unit_label}]"
+        self._refresh_calibration_status()
         if self.curve_oxidation is None:
             # First draw after a load or clear: rebuild the widget from scratch.
             # Also null the baseline refs so update_baseline_lines re-adds them
@@ -331,6 +351,46 @@ class MainWindow(QtWidgets.QMainWindow):
         """Aktualizuje ustawienia osi po zatwierdzeniu zmian w dialogu."""
         self.axis_settings = settings
         self.update_axis_settings()
+
+    def edit_calibration_settings(self):
+        """Otwiera dialog kalibracji jednostek prądu."""
+        dialog = CalibrationDialog(self.calibration_settings, self)
+        dialog.calibration_confirmed.connect(self.on_calibration_confirmed)
+        dialog.exec()
+
+    def on_calibration_confirmed(self, settings):
+        """Zapisuje nowe ustawienia kalibracji i odświeża wykres."""
+        self.calibration_settings = settings
+        if self.x is not None:
+            self.update_plot_from_raw_data()
+            # Drop stale peak rows — they still carry the pre-calibration numbers
+            # until the user re-runs compute_peak_parameters against calibrated y.
+            self.resultsTable.setRowCount(0)
+            QtWidgets.QMessageBox.information(
+                self, "Kalibracja",
+                "Kalibracja została zastosowana. Kliknij 'Oblicz parametry piku' aby zaktualizować wyniki."
+            )
+        else:
+            # No data loaded yet: still refresh status label and Y axis preview.
+            _, self.current_unit_label = analysis.apply_calibration(np.array([0.0]), settings)
+            self.axis_settings['y_label'] = f"Prąd [{self.current_unit_label}]"
+            self.update_axis_settings()
+            self._refresh_calibration_status()
+
+    def _refresh_calibration_status(self):
+        """Aktualizuje etykietę statusu kalibracji (ukrywa ją przy ustawieniach domyślnych)."""
+        s = self.calibration_settings
+        if not s.normalize_by_area and not s.normalize_by_concentration:
+            self.calibration_status_label.setText("")
+            return
+        parts = []
+        if s.normalize_by_area:
+            parts.append(f"A={s.electrode_area:g} cm²")
+        if s.normalize_by_concentration:
+            parts.append(f"c={s.concentration:g} mM")
+        self.calibration_status_label.setText(
+            f"Kalibracja aktywna: {', '.join(parts)} → {self.current_unit_label}"
+        )
 
     def edit_baseline_settings(self):
         """Otwiera dialog edycji ustawień linii bazowej."""
@@ -670,6 +730,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.insert_result_row("Zero crossing 2nd", x0, y0, "", "")
         self.second_deriv_intersections = zeros2
 
+    def open_curve_fitting_dialog(self):
+        """Otwiera niemodalny dialog dopasowania krzywej (Gauss/Lorentz/asymetryczny)."""
+        if self.x is None or self.y1 is None or self.y2 is None:
+            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            return
+        if self._curve_fit_dialog is not None:
+            self._curve_fit_dialog.close()
+        self._curve_fit_dialog = CurveFittingDialog(
+            x=self.x, y1=self.y1, y2=self.y2,
+            baseline_settings=self.baseline_settings,
+            x_label=self.axis_settings.get('x_label', 'E [mV]'),
+            y_unit_label=self.current_unit_label,
+            parent=self,
+        )
+        self._curve_fit_dialog.fit_added_to_table.connect(self._on_curve_fit_added)
+        self._curve_fit_dialog.show()
+
+    def _on_curve_fit_added(self, label, center, amplitude, r_squared, fwhm):
+        """Dodaje wiersz z parametrami dopasowania do tabeli wyników."""
+        self.insert_result_row(label, center, amplitude, r_squared, fwhm)
+
     def export_to_excel(self):
         """Eksportuje dane, parametry i wykres do pliku Excel."""
         if self.x is None:
@@ -707,6 +788,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 second_deriv_intersections=self.second_deriv_intersections,
                 e_half_value=self._e_half_value,
                 measurement_type=self.measurement_type,
+                calibration_settings=self.calibration_settings,
+                calibration_unit_label=self.current_unit_label,
             )
             QtWidgets.QMessageBox.information(
                 self, "Sukces", f"Dane oraz wykres zostały zapisane do pliku {filename}"
@@ -734,8 +817,12 @@ class MainWindow(QtWidgets.QMainWindow):
             <b>Utlenianie</b>: Kliknij „Zakres utlenienia (2× klik)" i wskaż dwa punkty.
             <b>Redukcja</b>: Kliknij „Zakres redukcji (2× klik)" i wskaż dwa punkty.
 
-            Po wybraniu liniowego fragmentu należy ręcznie dostosować współrzędne punktów linii bazowej w taki sposób,
-            aby obejmowała ona cały pik.</p>
+            <b>Oba punkty</b> umieść na <b>liniowym fragmencie woltamogramu PRZED narastaniem piku</b>
+            (po lewej stronie piku) — tam, gdzie prąd zmienia się liniowo i nie ma jeszcze aktywności redoks.
+            Prosta łącząca te punkty reprezentuje prąd tła (niefaradajowski) i zostanie
+            <b>ekstrapolowana</b> pod pik, aby oszacować linię bazową w położeniu maksimum.
+            Nie umieszczaj punktów po obu stronach piku — linia przecinałaby wtedy pik zamiast
+            stanowić jego tło, co zafałszuje wysokość H.</p>
 
             <p><b>5. Obliczenie parametrów piku</b><br/>
             Kliknij „Oblicz parametry piku". Program wyznaczy x_peak, y_peak, linię bazową, wysokość/głębokość piku i E₁/₂,
@@ -753,13 +840,75 @@ class MainWindow(QtWidgets.QMainWindow):
 
             <hr/>
 
+            <p><b>8. Automatyczne wykrywanie pików</b><br/>
+            • Kliknij „Wykryj piki automatycznie".<br/>
+            • <b>Minimalna wysokość piku</b>: filtruje szum — tylko piki o amplitudzie
+            większej lub równej tej wartości zostaną uznane za pik. Ustaw 0, aby wyłączyć filtr.<br/>
+            • <b>Minimalna odległość między pikami</b>: podawana w <i>punktach danych</i>
+            (nie w jednostkach osi X). Zapobiega wykrywaniu kilku pików w obrębie jednego
+            szerokiego maksimum.<br/>
+            • Zaznacz zakres(y) — utlenienia i/lub redukcji — dla których ma być uruchomione wyszukiwanie.<br/>
+            • Wykryte piki są nanoszone na wykres jako <b>żółte kółka</b> oraz
+            dopisywane do tabeli wyników jako „Pik auto (utl)" / „Pik auto (red)".</p>
+
+            <p><b>9. Kalibracja jednostek</b><br/>
+            • Kliknij „Kalibracja jednostek".<br/>
+            • Podaj <b>powierzchnię elektrody</b> [cm²] oraz/lub <b>stężenie analitu</b> [mM].<br/>
+            • Zaznacz odpowiednie checkboxy, aby znormalizować prąd.
+            Normalizacja względem powierzchni (μA/cm²) jest standardem publikacyjnym
+            i pozwala porównywać pomiary z elektrod o różnych rozmiarach. Normalizacja
+            względem stężenia (μA/mM) stosowana jest w analizie czujników.<br/>
+            • Podgląd jednostki wynikowej aktualizuje się na żywo.<br/>
+            • Po zatwierdzeniu kalibracji tabela wyników jest czyszczona — <b>należy
+            ponownie kliknąć „Oblicz parametry piku"</b>, aby uzyskać wartości wysokości
+            i głębokości w nowych jednostkach. Surowe dane pozostają nietknięte — kalibracja
+            jest zawsze stosowana jako krok post-processing.<br/>
+            • Aktywna kalibracja jest widoczna w prawej części paska stanu.</p>
+
+            <p><b>10. Dopasowanie krzywej</b><br/>
+            • Kliknij „Dopasowanie krzywej".<br/>
+            • Wybierz <b>model</b>: Gaussowski (piki symetryczne, dyfuzyjne),
+            Lorentzowski (piki z szerokimi ogonami, np. szybkie procesy kinetyczne),
+            Asymetryczny Gaussowski (piki zniekształcone, np. sprzężone procesy).<br/>
+            • Wybierz <b>krzywą</b> (utlenianie/redukcja) — zakres X jest automatycznie
+            wypełniany wartościami bieżącej linii bazowej, możesz go zmodyfikować.<br/>
+            • Kliknij „Dopasuj". Wyniki: <b>FWHM</b> (szerokość połówkowa — szerokość piku
+            na połowie jego wysokości), <b>amplituda</b>, <b>centrum piku</b>,
+            <b>R²</b> (dopasowanie; &gt; 0,99 uznaje się za bardzo dobre), a dla modelu
+            asymetrycznego — <b>asymetria</b> (σ_prawa/σ_lewa).<br/>
+            • Zielona przerywana linia na wykresie dialogu to dopasowany model.<br/>
+            • Przycisk „Dodaj do tabeli wyników" przenosi parametry do głównej tabeli.<br/>
+            • Dialog jest niemodalny — możesz nadal pracować z głównym oknem.</p>
+
+            <hr/>
+
             <p><b>Opcjonalne ustawienia</b><br/>
             • Tryb jasny/ciemny – przełącznik w górnym pasku.<br/>
-            • Ręczna edycja osi – przycisk „Edytuj ustawienia osi".</p>
+            • Ręczna edycja osi – przycisk „Edytuj ustawienia osi".<br/>
+            • Zakładka „Teoria" w górnym pasku — rozbudowany podręcznik teoretyczny.</p>
         </body>
         </html>
         """
-        QtWidgets.QMessageBox.information(self, "Help – instrukcja", help_text)
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Help – instrukcja")
+        dialog.setMinimumSize(400, 300)
+        dialog.resize(700, 600)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        browser = QtWidgets.QTextBrowser()
+        browser.setOpenExternalLinks(True)
+        browser.setHtml(help_text)
+        layout.addWidget(browser)
+        btn_row = QtWidgets.QHBoxLayout()
+        btn_row.addStretch(1)
+        close_btn = QtWidgets.QPushButton("Zamknij")
+        close_btn.clicked.connect(dialog.accept)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
+        # Center the dialog on the main window before showing it.
+        geom = dialog.frameGeometry()
+        geom.moveCenter(self.geometry().center())
+        dialog.move(geom.topLeft())
+        dialog.exec()
 
     def show_about(self):
         about_text = """
@@ -767,7 +916,15 @@ class MainWindow(QtWidgets.QMainWindow):
         <body>
             <h4 align="center">CVision</h4>
             <h4>Analiza woltamogramu cyklicznego</h4>
-            <p>Wersja: 2.0.0</p>
+            <p>Wersja: 3.0</p>
+            <p><b>Nowości w wersji 3.0:</b></p>
+            <ul>
+                <li>Automatyczne wykrywanie pików (scipy.signal.find_peaks)</li>
+                <li>Kalibracja jednostek — normalizacja prądu względem powierzchni
+                    elektrody i/lub stężenia analitu (μA → μA/cm², μA/mM, μA/(cm²·mM))</li>
+                <li>Dopasowanie krzywej — modele Gaussowski, Lorentzowski
+                    oraz asymetryczny Gaussowski z wyznaczaniem FWHM i R²</li>
+            </ul>
             <p>Autor: <b>StarGate3</b><br/>
             GitHub: <a href='https://github.com/StarGate3'>github.com/StarGate3</a>
             </p>
@@ -775,3 +932,306 @@ class MainWindow(QtWidgets.QMainWindow):
         </html>
         """
         QtWidgets.QMessageBox.about(self, "About", about_text)
+
+    def show_theory(self):
+        """Otwiera okno z podręcznikiem teoretycznym CV (6 zakładek)."""
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Teoria — podręcznik")
+        dialog.resize(780, 620)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        tabs = QtWidgets.QTabWidget()
+        tabs.setStyleSheet("""
+            QTabBar::tab {
+                background-color: #555555;
+                color: #ffffff;
+                padding: 6px 12px;
+                margin-right: 2px;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+            QTabBar::tab:selected {
+                background-color: #0078d4;
+                color: #ffffff;
+            }
+            QTabBar::tab:hover {
+                background-color: #666666;
+                color: #ffffff;
+            }
+        """)
+        for title, html in self._theory_tabs():
+            scroll = QtWidgets.QScrollArea()
+            scroll.setWidgetResizable(True)
+            label = QtWidgets.QLabel(html)
+            label.setWordWrap(True)
+            label.setTextFormat(QtCore.Qt.TextFormat.RichText)
+            label.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.TextBrowserInteraction)
+            label.setOpenExternalLinks(True)
+            label.setMargin(12)
+            label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+            scroll.setWidget(label)
+            tabs.addTab(scroll, title)
+        layout.addWidget(tabs)
+        close_btn = QtWidgets.QPushButton("Zamknij")
+        close_btn.clicked.connect(dialog.accept)
+        btn_row = QtWidgets.QHBoxLayout()
+        btn_row.addStretch(1)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
+        dialog.exec()
+
+    def _theory_tabs(self):
+        """Zwraca listę krotek (tytuł_zakładki, html) z treścią teoretyczną."""
+        cv = """
+        <h3>Woltametria cykliczna (CV)</h3>
+        <p><b>Czym jest CV?</b> Woltametria cykliczna to technika elektroanalityczna,
+        w której potencjał elektrody roboczej jest zmieniany liniowo w czasie między
+        dwiema wartościami granicznymi, a następnie zawracany — tworząc cykl. Jednocześnie
+        rejestrowany jest prąd płynący przez elektrodę.</p>
+
+        <h3>Zasada działania</h3>
+        <p>Potencjostat wymusza na elektrodzie roboczej zadany potencjał względem elektrody
+        odniesienia, a prąd mierzy między elektrodą roboczą a pomocniczą. Zmiana potencjału
+        wywołuje reakcje utleniania (na krzywej narastającej) i redukcji (na krzywej
+        opadającej) substancji elektroaktywnej.</p>
+
+        <h3>Opis woltamogramu</h3>
+        <ul>
+            <li><b>Oś X — potencjał E [mV lub V]:</b> narzucona siła elektrochemiczna.</li>
+            <li><b>Oś Y — prąd I [μA]:</b> odpowiedź układu. Konwencja IUPAC: prądy
+            anodowe (utlenianie) dodatnie, katodowe (redukcja) ujemne.</li>
+        </ul>
+
+        <h3>Piki utleniania i redukcji</h3>
+        <p><b>Pik anodowy (ip,a)</b> pojawia się podczas skanu w kierunku dodatnich
+        potencjałów i odpowiada utlenianiu analitu na elektrodzie. <b>Pik katodowy
+        (ip,c)</b> pojawia się podczas skanu wstecznego i odpowiada redukcji produktu
+        utlenienia. Obecność obu pików świadczy o procesie co najmniej quasi-odwracalnym.</p>
+
+        <h3>Potencjał półfalowy E½</h3>
+        <p>Dla procesu odwracalnego E½ definiuje się jako średnią arytmetyczną potencjałów
+        piku anodowego i katodowego:</p>
+        <p style="margin-left:2em;"><b>E½ = (E<sub>p,a</sub> + E<sub>p,c</sub>) / 2</b></p>
+        <p>E½ jest bliski formalnemu potencjałowi redoks i charakteryzuje daną parę
+        redoks niezależnie od szybkości skanowania (dla procesu odwracalnego).</p>
+        """
+
+        baseline = """
+        <h3>Dlaczego korekcja linii bazowej jest konieczna</h3>
+        <p>Zmierzony prąd piku to suma prądu faradajowskiego (reakcja redoks) oraz
+        prądu tła — pojemnościowego ładowania podwójnej warstwy i prądów
+        pochodzących od rozpuszczalnika/elektrolitu. Aby wyznaczyć prawdziwą
+        wysokość piku (<b>H</b>) musimy odjąć prąd tła.</p>
+
+        <h3>Jak prawidłowo wybrać punkty linii bazowej</h3>
+        <p>Standardowa metoda korekcji linii bazowej w CV polega na wybraniu
+        <b>obu</b> punktów na <b>liniowym fragmencie woltamogramu PRZED narastaniem
+        piku</b> — po <i>lewej</i> stronie piku, w obszarze, w którym prąd jeszcze
+        nie zaczął rosnąć na skutek reakcji redoks. Linia bazowa jest następnie
+        <b>ekstrapolowana</b> jako prosta pod pikiem, aby oszacować prąd tła
+        (niefaradajowski), który płynąłby, gdyby reakcja redoks nie zachodziła.</p>
+        <ul>
+            <li>Oba punkty (x<sub>1</sub>, y<sub>1</sub>) i (x<sub>2</sub>, y<sub>2</sub>)
+            umieść na <b>płaskim, liniowym odcinku</b> woltamogramu poprzedzającym pik —
+            tam, gdzie prąd zmienia się liniowo z potencjałem i nie ma jeszcze
+            aktywności faradajowskiej.</li>
+            <li>Prosta łącząca te dwa punkty reprezentuje prąd niefaradajowski
+            (ładowanie podwójnej warstwy, tło rozpuszczalnika/elektrolitu) —
+            jest ekstrapolowana pod pik do położenia E<sub>p</sub>.</li>
+            <li>Wysokość piku H to odległość od piku do tej ekstrapolowanej linii
+            w położeniu maksimum, a nie do prostej łączącej punkty po obu stronach piku.</li>
+            <li>Oba punkty powinny leżeć na tej samej gałęzi woltamogramu
+            (narastającej lub opadającej) i wystarczająco blisko siebie, aby
+            zachować lokalne nachylenie tła.</li>
+            <li>W CVision możesz wybrać punkty dwukrotnym kliknięciem lub edytować
+            numerycznie w oknie „Edytuj linię bazową".</li>
+        </ul>
+
+        <h3>Wpływ złego doboru linii bazowej</h3>
+        <ul>
+            <li><b>Punkty po obu stronach piku</b> — linia przecina pik zamiast stanowić
+            jego tło; wysokość H jest zaniżona, a jej wartość zależy arbitralnie od
+            wybranego zakresu.</li>
+            <li><b>Punkt w obszarze narastania piku</b> — ekstrapolacja jest nienaturalnie
+            skośna, pozorny pik lub brak piku.</li>
+            <li><b>Zbyt szeroki zakres obejmujący inne procesy</b> — nachylenie prostej
+            zaburzone przez sąsiedni pik, H zawyżone lub zaniżone.</li>
+            <li><b>Zbyt krótki odcinek liniowy</b> — punkty podatne na szum, duża
+            niepewność ekstrapolacji.</li>
+        </ul>
+        <p>Dobra praktyka: zawsze wizualnie zweryfikuj, czy ekstrapolowana linia
+        bazowa biegnie naturalnie pod pikiem, przed odczytem parametrów piku.</p>
+        """
+
+        peaks = """
+        <h3>Wysokość (H) i głębokość (D) piku</h3>
+        <p>Wysokość piku anodowego <b>H = i<sub>p,a</sub> − i<sub>baseline</sub>(E<sub>p,a</sub>)</b>
+        to odległość maksimum od linii bazowej w jego położeniu. Analogicznie
+        głębokość piku katodowego <b>D = i<sub>baseline</sub>(E<sub>p,c</sub>) − i<sub>p,c</sub></b>.
+        Obie wielkości są dodatnie i wyrażone w μA (lub — po kalibracji — w μA/cm²,
+        μA/mM, μA/(cm²·mM)).</p>
+
+        <h3>Stosunek prądów i<sub>p,a</sub> / i<sub>p,c</sub></h3>
+        <p>Stosunek wysokości piku anodowego do katodowego informuje o odwracalności
+        procesu elektrochemicznego:</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>i<sub>p,a</sub> / i<sub>p,c</sub></th><th>Interpretacja</th></tr>
+            <tr><td>≈ 1,0</td><td>Proces odwracalny (forma utleniona i zredukowana stabilne)</td></tr>
+            <tr><td>&lt; 1 lub &gt; 1</td><td>Proces quasi-odwracalny lub sprzężona reakcja chemiczna</td></tr>
+            <tr><td>brak jednego z pików</td><td>Proces nieodwracalny</td></tr>
+        </table>
+
+        <h3>Równanie Randlesa-Ševčíka</h3>
+        <p>Dla procesu odwracalnego, kontrolowanego dyfuzją, prąd piku wynosi:</p>
+        <p style="margin-left:2em;"><b>i<sub>p</sub> = 0,4463 · n · F · A · C · √(n · F · v · D / (R · T))</b></p>
+        <p>W 25 °C upraszcza się do i<sub>p</sub> = (2,69·10⁵) · n<sup>3/2</sup> · A · C · √(D · v).</p>
+        <p><b>Znaczenie symboli:</b></p>
+        <ul>
+            <li><b>i<sub>p</sub></b> — prąd piku [A]</li>
+            <li><b>n</b> — liczba elektronów biorących udział w reakcji</li>
+            <li><b>F</b> — stała Faradaya (96 485 C/mol)</li>
+            <li><b>A</b> — powierzchnia elektrody [cm²]</li>
+            <li><b>C</b> — stężenie analitu w roztworze [mol/cm³]</li>
+            <li><b>v</b> — szybkość skanowania potencjału [V/s]</li>
+            <li><b>D</b> — współczynnik dyfuzji analitu [cm²/s]</li>
+            <li><b>R</b> — stała gazowa (8,314 J/(mol·K))</li>
+            <li><b>T</b> — temperatura [K]</li>
+        </ul>
+        <p>Liniowa zależność i<sub>p</sub> od √v jest diagnostyką procesu
+        kontrolowanego dyfuzją.</p>
+        """
+
+        derivatives = """
+        <h3>Po co obliczać pochodną woltamogramu</h3>
+        <p>Pochodne pomagają precyzyjnie zlokalizować cechy woltamogramu niewidoczne
+        „gołym okiem" na surowym sygnale — szczególnie gdy piki są słabo
+        rozdzielone, asymetryczne, lub proces jest nieodwracalny.</p>
+
+        <h3>Pierwsza pochodna dI/dE</h3>
+        <ul>
+            <li>Miejsce zerowe pierwszej pochodnej odpowiada ekstremum prądu:
+            <b>dI/dE = 0</b> → maksimum (pik utleniania) lub minimum (pik redukcji).</li>
+            <li>Pozwala znaleźć dokładne E<sub>p</sub> bez wizualnego odgadywania.</li>
+        </ul>
+
+        <h3>Druga pochodna d²I/dE²</h3>
+        <ul>
+            <li>Miejsca zerowe drugiej pochodnej oznaczają punkty przegięcia krzywej CV —
+            przydatne dla procesów <b>nieodwracalnych</b>, gdzie klasyczny pik nie tworzy
+            wyraźnego maksimum (np. elektroutlenianie organiki).</li>
+            <li>Pozwala oszacować potencjał półfalowy nawet przy braku piku redukcyjnego.</li>
+        </ul>
+
+        <h3>Wygładzanie Savitzky-Golay</h3>
+        <p>Pochodne wzmacniają szum. Przed ich obliczaniem warto wygładzić sygnał filtrem
+        Savitzky-Golay, który lokalnie dopasowuje wielomian niskiego stopnia metodą
+        najmniejszych kwadratów, zachowując kształt piku lepiej niż średnia krocząca.</p>
+        <p><b>Dobór parametrów:</b></p>
+        <ul>
+            <li><b>Okno</b> (liczba nieparzysta): im większe, tym silniejsze wygładzanie,
+            ale ryzyko spłaszczenia piku. W praktyce 7–15 punktów dla typowego CV.</li>
+            <li><b>Stopień wielomianu</b>: 2 lub 3 dla typowych kształtów, 4–5 dla
+            bardziej złożonych sygnałów. Musi być <b>mniejszy</b> niż okno.</li>
+            <li>Złota zasada: zwiększaj okno tylko na tyle, aby usunąć szum, i sprawdź,
+            czy amplituda piku nie spada.</li>
+        </ul>
+        """
+
+        fitting = """
+        <h3>Kiedy stosować Gaussa, a kiedy Lorentza</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Model</th><th>Kształt</th><th>Zastosowanie</th></tr>
+            <tr><td>Gaussowski</td>
+                <td>szybko opadające ogony (exp(−x²))</td>
+                <td>piki symetryczne, kontrolowane dyfuzją, niski szum</td></tr>
+            <tr><td>Lorentzowski</td>
+                <td>wolno opadające, szerokie ogony (1/(1+x²))</td>
+                <td>procesy z szybką kinetyką, poszerzenie jednorodne</td></tr>
+            <tr><td>Asymetryczny Gaussowski</td>
+                <td>różne σ z dwóch stron centrum</td>
+                <td>piki zniekształcone przez sprzężone reakcje chemiczne
+                    lub adsorpcję</td></tr>
+        </table>
+
+        <h3>FWHM — szerokość połówkowa</h3>
+        <p><b>FWHM</b> (Full Width at Half Maximum) to szerokość piku na wysokości
+        równej połowie jego amplitudy. Wzory modelowe:</p>
+        <ul>
+            <li>Gauss: <b>FWHM = 2·√(2·ln2)·σ ≈ 2,3548·σ</b></li>
+            <li>Lorentz: <b>FWHM = 2·γ</b></li>
+            <li>Asymetryczny Gauss: <b>FWHM = √(2·ln2)·(σ<sub>L</sub> + σ<sub>R</sub>)</b></li>
+        </ul>
+        <p>Dla procesu odwracalnego w 25 °C teoretyczna FWHM piku wynosi ≈ 90,6/n mV
+        (n — liczba elektronów). Znacznie szerszy pik świadczy o nieodwracalności lub
+        powolnym transporcie.</p>
+
+        <h3>Asymetria piku</h3>
+        <p>Współczynnik <b>asymetrii = σ<sub>prawa</sub> / σ<sub>lewa</sub></b>:</p>
+        <ul>
+            <li><b>≈ 1,0</b> — pik symetryczny (czysty proces dyfuzyjny).</li>
+            <li><b>&gt; 1</b> — prawa strona szersza (np. sprzężona reakcja chemiczna
+            po etapie elektronowym, mechanizm EC).</li>
+            <li><b>&lt; 1</b> — lewa strona szersza (np. adsorpcja formy utlenionej).</li>
+        </ul>
+
+        <h3>Współczynnik determinacji R²</h3>
+        <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> mierzy jaki procent zmienności
+        danych wyjaśnia model:</p>
+        <ul>
+            <li><b>R² &gt; 0,99</b> — dopasowanie bardzo dobre, model adekwatny.</li>
+            <li><b>0,95 – 0,99</b> — akceptowalne, ale warto sprawdzić inny model
+            lub zmniejszyć zakres dopasowania.</li>
+            <li><b>&lt; 0,95</b> — model niewłaściwy lub dane zaszumione; rozważ
+            wygładzanie lub model asymetryczny.</li>
+        </ul>
+        """
+
+        calibration = """
+        <h3>Normalizacja do powierzchni elektrody (standard publikacyjny)</h3>
+        <p>Prąd zarejestrowany na elektrodzie zależy liniowo od jej powierzchni
+        (patrz równanie Randlesa-Ševčíka). Porównywanie bezwzględnych wartości μA
+        z różnych elektrod jest bezsensowne. Dlatego w publikacjach elektrochemicznych
+        standardem jest <b>gęstość prądu j = i / A [μA/cm²]</b>.</p>
+
+        <h3>Wyznaczanie rzeczywistej powierzchni elektrody (ECSA)</h3>
+        <p><b>ECSA</b> (Electrochemically Active Surface Area) to powierzchnia faktycznie
+        dostępna dla reakcji, zwykle większa niż powierzchnia geometryczna dla elektrod
+        nanostrukturalnych. Typowe metody:</p>
+        <ul>
+            <li><b>Metoda Randlesa-Ševčíka:</b> wyznacz i<sub>p</sub> dla kilku szybkości
+            skanowania z wzorcem o znanym D i C (np. [Fe(CN)<sub>6</sub>]³⁻/⁴⁻),
+            dopasuj i<sub>p</sub> vs √v i oblicz A z nachylenia.</li>
+            <li><b>Metoda pojemnościowa (double-layer):</b> z CV bez aktywnych par
+            redoks oblicz pojemność C<sub>dl</sub> i podziel przez specyficzną pojemność
+            materiału (zwykle 20–60 μF/cm² dla metali).</li>
+            <li><b>Metoda utleniania H<sub>upd</sub></b> (dla Pt) — z ładunku pików
+            desorpcji wodoru, 210 μC/cm² dla Pt(111).</li>
+            <li><b>Metoda wzorca redoks</b> — z CV [Ru(NH<sub>3</sub>)<sub>6</sub>]³⁺ lub
+            ferrocenu o znanym współczynniku dyfuzji.</li>
+        </ul>
+
+        <h3>Normalizacja do stężenia — czujniki elektrochemiczne</h3>
+        <p>W analityce czujnikowej istotna jest <b>czułość na stężenie</b>, wyrażana
+        w μA/mM lub (po dodatkowej normalizacji) μA/(cm²·mM). Pozwala porównywać
+        różne konstrukcje czujników niezależnie od rozmiaru i stężenia kalibracyjnego.</p>
+
+        <h3>Przelicznik jednostek w CVision</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Sytuacja</th><th>Operacja</th><th>Jednostka wynikowa</th></tr>
+            <tr><td>Brak normalizacji</td><td>i</td><td>μA</td></tr>
+            <tr><td>Normalizuj względem A</td><td>i / A</td><td>μA/cm²</td></tr>
+            <tr><td>Normalizuj względem c</td><td>i / c</td><td>μA/mM</td></tr>
+            <tr><td>Obie normalizacje</td><td>i / (A · c)</td><td>μA/(cm²·mM)</td></tr>
+        </table>
+        <p><b>Przykład:</b> pik o wysokości 168,175 μA dla elektrody o A = 0,071 cm²
+        daje 168,175 / 0,071 ≈ <b>2368,66 μA/cm²</b>. Tę wartość można porównywać
+        z literaturą niezależnie od wielkości elektrody.</p>
+        """
+
+        return [
+            ("Woltametria cykliczna", cv),
+            ("Linia bazowa", baseline),
+            ("Parametry piku", peaks),
+            ("Pochodne i miejsca zerowe", derivatives),
+            ("Dopasowanie krzywych", fitting),
+            ("Kalibracja jednostek", calibration),
+        ]

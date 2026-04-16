@@ -1,6 +1,23 @@
-PyQt6
-pyqtgraph
-numpy
-pandas
-scipy
-XlsxWriter
+# Qt bindings — main GUI framework (windows, dialogs, widgets, event loop).
+PyQt6>=6.2
+
+# High-performance scientific plotting built on Qt — used for the main voltammogram,
+# baseline regions, derivative windows and the curve-fitting preview plot.
+pyqtgraph>=0.13
+
+# Numerical arrays used everywhere: raw data loading (np.loadtxt), smoothing input,
+# baseline math, calibration, derivative/gradient computation.
+numpy>=1.21
+
+# Signal and optimization routines:
+#   scipy.signal.savgol_filter — Savitzky-Golay smoothing
+#   scipy.signal.find_peaks    — automatic peak detection
+#   scipy.optimize.curve_fit   — Gaussian / Lorentzian / asymmetric-Gaussian fitting
+scipy>=1.8
+
+# DataFrame assembly for the Excel export (one sheet per data class, clean column layout).
+pandas>=1.3
+
+# Excel writer engine used by pandas (`ExcelWriter(..., engine='xlsxwriter')`);
+# also builds the embedded line chart inserted into the "Dane" sheet.
+XlsxWriter>=3.0

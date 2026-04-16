@@ -1,7 +1,43 @@
 """Pure numerical functions for CV peak analysis: smoothing, baseline evaluation, peak finding, and derivatives."""
 
+from dataclasses import dataclass
+
 import numpy as np
 from scipy.signal import savgol_filter, find_peaks
+from scipy.optimize import curve_fit
+
+
+@dataclass
+class CalibrationSettings:
+    """User-configured current calibration: electrode area and analyte concentration normalization."""
+    electrode_area: float = 1.0
+    concentration: float = 1.0
+    normalize_by_area: bool = False
+    normalize_by_concentration: bool = False
+
+
+def apply_calibration(y, settings):
+    """Normalize a current array by electrode area and/or concentration.
+
+    Returns (calibrated_y, unit_label). The input array is never modified in place.
+    """
+    divisor = 1.0
+    if settings.normalize_by_area:
+        divisor *= settings.electrode_area
+    if settings.normalize_by_concentration:
+        divisor *= settings.concentration
+
+    calibrated = y / divisor if divisor != 1.0 else y.copy()
+
+    if settings.normalize_by_area and settings.normalize_by_concentration:
+        unit_label = "μA/(cm²·mM)"
+    elif settings.normalize_by_area:
+        unit_label = "μA/cm²"
+    elif settings.normalize_by_concentration:
+        unit_label = "μA/mM"
+    else:
+        unit_label = "μA"
+    return calibrated, unit_label
 
 
 def apply_smoothing(raw_y, window_length, polyorder):
@@ -140,3 +176,120 @@ def detect_peaks(x, y, mode, min_height=None, min_distance=None):
     else:
         indices, _ = find_peaks(-y, **kwargs)
         return [{'x': float(x[i]), 'y': float(y[i]), 'height': float(-y[i])} for i in indices]
+
+
+def gaussian(x, amplitude, center, sigma):
+    """Symmetric Gaussian peak."""
+    return amplitude * np.exp(-((x - center) ** 2) / (2.0 * sigma ** 2))
+
+
+def lorentzian(x, amplitude, center, gamma):
+    """Lorentzian (Cauchy) peak with half-width-at-half-maximum gamma."""
+    return amplitude * (gamma ** 2 / ((x - center) ** 2 + gamma ** 2))
+
+
+def asymmetric_gaussian(x, amplitude, center, sigma_left, sigma_right):
+    """Gaussian with different widths on either side of the center."""
+    sigma = np.where(x < center, sigma_left, sigma_right)
+    return amplitude * np.exp(-((x - center) ** 2) / (2.0 * sigma ** 2))
+
+
+def _empty_fit_result(error):
+    return {
+        'params': None, 'fwhm': None, 'asymmetry': None,
+        'r_squared': None, 'x_fit': None, 'y_fit': None,
+        'error': error,
+    }
+
+
+def fit_peak(x, y, model='gaussian', x_min=None, x_max=None):
+    """
+    Fit a peak-shape model to (x, y) after cropping to [x_min, x_max] and removing
+    a linear baseline between the endpoints of the cropped range.
+
+    model: 'gaussian', 'lorentzian', or 'asymmetric_gaussian'.
+    Returns a dict with params, fwhm, asymmetry, r_squared, x_fit, y_fit, error.
+    Never raises — failures come back in the 'error' field.
+    """
+    if x_min is None:
+        x_min = float(np.min(x))
+    if x_max is None:
+        x_max = float(np.max(x))
+    if x_min > x_max:
+        x_min, x_max = x_max, x_min
+
+    mask = (x >= x_min) & (x <= x_max)
+    x_crop = np.asarray(x[mask], dtype=float)
+    y_crop = np.asarray(y[mask], dtype=float)
+
+    if len(x_crop) < 5:
+        return _empty_fit_result("Zbyt mało punktów danych w wybranym zakresie (minimum 5).")
+
+    # Detrend: subtract the straight line between the first and last points of the crop.
+    if x_crop[-1] != x_crop[0]:
+        slope = (y_crop[-1] - y_crop[0]) / (x_crop[-1] - x_crop[0])
+    else:
+        slope = 0.0
+    intercept = y_crop[0] - slope * x_crop[0]
+    baseline_crop = slope * x_crop + intercept
+    y_det = y_crop - baseline_crop
+
+    # Initial guesses
+    abs_y = np.abs(y_det)
+    idx_peak = int(np.argmax(abs_y))
+    amp0 = float(y_det[idx_peak])
+    if amp0 == 0.0:
+        amp0 = float(np.max(abs_y)) or 1.0
+    center0 = float(x_crop[idx_peak])
+    width0 = (x_max - x_min) / 4.0 or 1.0
+
+    try:
+        if model == 'gaussian':
+            popt, _ = curve_fit(gaussian, x_crop, y_det, p0=[amp0, center0, width0])
+            amplitude, center, sigma = (float(v) for v in popt)
+            fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0)) * abs(sigma)
+            asymmetry = None
+            params = {'amplitude': amplitude, 'center': center, 'sigma': sigma}
+            model_fn = gaussian
+        elif model == 'lorentzian':
+            popt, _ = curve_fit(lorentzian, x_crop, y_det, p0=[amp0, center0, width0])
+            amplitude, center, gamma = (float(v) for v in popt)
+            fwhm = 2.0 * abs(gamma)
+            asymmetry = None
+            params = {'amplitude': amplitude, 'center': center, 'gamma': gamma}
+            model_fn = lorentzian
+        elif model == 'asymmetric_gaussian':
+            popt, _ = curve_fit(
+                asymmetric_gaussian, x_crop, y_det,
+                p0=[amp0, center0, width0, width0],
+            )
+            amplitude, center, sigma_left, sigma_right = (float(v) for v in popt)
+            fwhm = np.sqrt(2.0 * np.log(2.0)) * (abs(sigma_left) + abs(sigma_right))
+            asymmetry = abs(sigma_right) / abs(sigma_left) if sigma_left != 0 else None
+            params = {
+                'amplitude': amplitude, 'center': center,
+                'sigma_left': sigma_left, 'sigma_right': sigma_right,
+            }
+            model_fn = asymmetric_gaussian
+        else:
+            return _empty_fit_result(f"Nieznany model: {model}")
+    except Exception as exc:
+        return _empty_fit_result(str(exc))
+
+    y_model = model_fn(x_crop, *popt)
+    ss_res = float(np.sum((y_det - y_model) ** 2))
+    ss_tot = float(np.sum((y_det - np.mean(y_det)) ** 2))
+    r_squared = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
+
+    x_fit = np.linspace(float(x_crop[0]), float(x_crop[-1]), 500)
+    y_fit = model_fn(x_fit, *popt) + (slope * x_fit + intercept)
+
+    return {
+        'params': params,
+        'fwhm': float(fwhm),
+        'asymmetry': float(asymmetry) if asymmetry is not None else None,
+        'r_squared': float(r_squared),
+        'x_fit': x_fit,
+        'y_fit': y_fit,
+        'error': None,
+    }
