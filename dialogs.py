@@ -311,3 +311,55 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         self.red_preview_label.setText(
             f"x1: {settings['reduction']['x1']:.3f}, y1: {settings['reduction']['y1']:.3f} | x2: {settings['reduction']['x2']:.3f}, y2: {settings['reduction']['y2']:.3f}"
         )
+
+
+class PeakDetectionDialog(QtWidgets.QDialog):
+    """Dialog do konfiguracji automatycznego wykrywania pików."""
+
+    detection_confirmed = QtCore.pyqtSignal(float, int, bool, bool)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Automatyczne wykrywanie pików")
+        self._init_ui()
+
+    def _init_ui(self):
+        layout = QtWidgets.QFormLayout(self)
+
+        self.min_height_spin = QtWidgets.QDoubleSpinBox()
+        self.min_height_spin.setRange(0.0, 10000.0)
+        self.min_height_spin.setDecimals(3)
+        self.min_height_spin.setValue(0.0)
+        layout.addRow("Minimalna wysokość piku:", self.min_height_spin)
+
+        self.min_distance_spin = QtWidgets.QSpinBox()
+        self.min_distance_spin.setRange(1, 500)
+        self.min_distance_spin.setValue(5)
+        self.min_distance_spin.setSuffix(" punktów danych")
+        layout.addRow("Minimalna odległość między pikami:", self.min_distance_spin)
+
+        self.detect_ox_check = QtWidgets.QCheckBox("Zakres utlenienia")
+        self.detect_ox_check.setChecked(True)
+        layout.addRow(self.detect_ox_check)
+
+        self.detect_red_check = QtWidgets.QCheckBox("Zakres redukcji")
+        self.detect_red_check.setChecked(True)
+        layout.addRow(self.detect_red_check)
+
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok |
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel,
+            parent=self
+        )
+        buttons.accepted.connect(self._on_accept)
+        buttons.rejected.connect(self.reject)
+        layout.addRow(buttons)
+
+    def _on_accept(self):
+        self.detection_confirmed.emit(
+            self.min_height_spin.value(),
+            self.min_distance_spin.value(),
+            self.detect_ox_check.isChecked(),
+            self.detect_red_check.isChecked(),
+        )
+        self.accept()

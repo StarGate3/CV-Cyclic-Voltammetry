@@ -9,7 +9,7 @@ import numpy as np
 from PyQt6 import QtWidgets, QtGui, QtCore
 import pyqtgraph as pg
 
-from dialogs import AxisSettingsDialog, BaselineSettingsDialog
+from dialogs import AxisSettingsDialog, BaselineSettingsDialog, PeakDetectionDialog
 from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
 import export as _export_module
@@ -76,6 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.second_deriv_y2 = None
         self.deriv_intersections = None
         self.second_deriv_intersections = None
+        self.auto_peak_scatter_items = []
         self.smoothingCheckBox.stateChanged.connect(self.update_plot_from_raw_data)
         # Only redraw when smoothing is actually active (QUAL-04).
         self.windowSpinBox.valueChanged.connect(
@@ -137,6 +138,9 @@ class MainWindow(QtWidgets.QMainWindow):
         btn_compute_peak = QtWidgets.QPushButton("Oblicz parametry piku")
         btn_compute_peak.clicked.connect(self.compute_peak_parameters)
         row.addWidget(btn_compute_peak)
+        btn_auto_peaks = QtWidgets.QPushButton("Wykryj piki automatycznie")
+        btn_auto_peaks.clicked.connect(self.open_peak_detection_dialog)
+        row.addWidget(btn_auto_peaks)
         btn_derivative = QtWidgets.QPushButton("Oblicz pochodną")
         btn_derivative.clicked.connect(self.compute_derivative)
         row.addWidget(btn_derivative)
@@ -298,6 +302,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.peak_curve_reduction = None
         self.curve_oxidation = None   # null so next load triggers a full redraw (PERF-02)
         self.curve_reduction = None
+        for item in self.auto_peak_scatter_items:
+            self.plot_widget.removeItem(item)
+        self.auto_peak_scatter_items = []
         self.resultsTable.setRowCount(0)
         self.x = None
         self.raw_y1 = None
@@ -566,6 +573,60 @@ class MainWindow(QtWidgets.QMainWindow):
             results += f"E1/2: {E_half:.3f}\n"
 
         QtWidgets.QMessageBox.information(self, "Parametry piku", results)
+
+    def open_peak_detection_dialog(self):
+        """Otwiera dialog automatycznego wykrywania pików."""
+        if self.x is None:
+            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            return
+        dialog = PeakDetectionDialog(self)
+        dialog.detection_confirmed.connect(self._on_peak_detection_confirmed)
+        dialog.exec()
+
+    def _on_peak_detection_confirmed(self, min_height, min_distance, detect_ox, detect_red):
+        """Uruchamia detekcję pików i nanosi wyniki na wykres oraz do tabeli."""
+        for item in self.auto_peak_scatter_items:
+            self.plot_widget.removeItem(item)
+        self.auto_peak_scatter_items = []
+
+        height_filter = min_height if min_height > 0.0 else None
+        total_found = 0
+
+        if detect_ox:
+            ox_peaks = analysis.detect_peaks(self.x, self.y1, 'oxidation',
+                                             min_height=height_filter,
+                                             min_distance=min_distance)
+            for peak in ox_peaks:
+                scatter = self.plot_widget.plot(
+                    [peak['x']], [peak['y']],
+                    pen=None, symbol='o',
+                    symbolBrush=pg.mkBrush(255, 255, 0, 220),
+                    symbolSize=10,
+                )
+                self.auto_peak_scatter_items.append(scatter)
+                self.insert_result_row("Pik auto (utl)", peak['x'], peak['y'], "", peak['height'])
+            total_found += len(ox_peaks)
+
+        if detect_red:
+            red_peaks = analysis.detect_peaks(self.x, self.y2, 'reduction',
+                                              min_height=height_filter,
+                                              min_distance=min_distance)
+            for peak in red_peaks:
+                scatter = self.plot_widget.plot(
+                    [peak['x']], [peak['y']],
+                    pen=None, symbol='o',
+                    symbolBrush=pg.mkBrush(255, 255, 0, 220),
+                    symbolSize=10,
+                )
+                self.auto_peak_scatter_items.append(scatter)
+                self.insert_result_row("Pik auto (red)", peak['x'], peak['y'], "", peak['height'])
+            total_found += len(red_peaks)
+
+        if total_found == 0:
+            QtWidgets.QMessageBox.information(
+                self, "Brak pików",
+                "Nie wykryto żadnych pików przy podanych parametrach."
+            )
 
     def insert_result_row(self, peak_type, x_peak, y_peak, baseline, h_or_d):
         """Wstawia nowy wiersz do tabeli wyników."""

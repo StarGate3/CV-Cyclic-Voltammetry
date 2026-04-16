@@ -1,7 +1,7 @@
 """Pure numerical functions for CV peak analysis: smoothing, baseline evaluation, peak finding, and derivatives."""
 
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, find_peaks
 
 
 def apply_smoothing(raw_y, window_length, polyorder):
@@ -115,3 +115,28 @@ def compute_second_derivatives(x, y1, y2):
     """Return second numerical derivatives of y1 and y2 with respect to x."""
     d1, d2 = compute_derivatives(x, y1, y2)
     return np.gradient(d1, x), np.gradient(d2, x)
+
+
+def detect_peaks(x, y, mode, min_height=None, min_distance=None):
+    """
+    Detect peaks in y using scipy.signal.find_peaks.
+
+    mode='oxidation': detects local maxima.
+    mode='reduction': detects local minima (find_peaks on -y).
+    min_height: minimum peak amplitude (absolute value); None disables filtering.
+    min_distance: minimum separation between peaks in data points; None disables filtering.
+
+    Returns list of dicts [{'x': float, 'y': float, 'height': float}, ...].
+    """
+    kwargs = {}
+    if min_height is not None:
+        kwargs['height'] = min_height
+    if min_distance is not None:
+        kwargs['distance'] = min_distance
+
+    if mode == 'oxidation':
+        indices, _ = find_peaks(y, **kwargs)
+        return [{'x': float(x[i]), 'y': float(y[i]), 'height': float(y[i])} for i in indices]
+    else:
+        indices, _ = find_peaks(-y, **kwargs)
+        return [{'x': float(x[i]), 'y': float(y[i]), 'height': float(-y[i])} for i in indices]
