@@ -940,52 +940,54 @@ TRANSLATIONS = {
         (iR) drop — which can inflate the observed value.</p>
         """,
 
-        "theory_tab2_title_en": "Linia bazowa",
+        "theory_tab2_title_en": "Baseline",
         "theory_tab2_html_en": """
-        <h3>Dlaczego korekcja linii bazowej jest konieczna</h3>
-        <p>Zmierzony prąd piku to suma prądu faradajowskiego (reakcja redoks) oraz
-        prądu tła — pojemnościowego ładowania podwójnej warstwy i prądów
-        pochodzących od rozpuszczalnika/elektrolitu. Aby wyznaczyć prawdziwą
-        wysokość piku (<b>H</b>) musimy odjąć prąd tła.</p>
+        <h3>Why baseline correction is necessary</h3>
+        <p>The measured peak current is the sum of the faradaic current (redox reaction)
+        and the background current — capacitive charging of the double layer and
+        currents originating from the solvent/electrolyte. To determine the true
+        peak height (<b>H</b>) we must subtract the background current.</p>
 
-        <h3>Jak prawidłowo wybrać punkty linii bazowej</h3>
-        <p>Standardowa metoda korekcji linii bazowej w CV polega na wybraniu
-        <b>obu</b> punktów na <b>liniowym fragmencie woltamogramu PRZED narastaniem
-        piku</b> — po <i>lewej</i> stronie piku, w obszarze, w którym prąd jeszcze
-        nie zaczął rosnąć na skutek reakcji redoks. Linia bazowa jest następnie
-        <b>ekstrapolowana</b> jako prosta pod pikiem, aby oszacować prąd tła
-        (niefaradajowski), który płynąłby, gdyby reakcja redoks nie zachodziła.</p>
+        <h3>How to correctly choose the baseline points</h3>
+        <p>The standard method for baseline correction in CV consists of choosing
+        <b>both</b> points on a <b>linear segment of the voltammogram BEFORE the peak
+        rises</b> — on the <i>left</i> side of the peak, in the region where the current
+        has not yet begun to rise due to the redox reaction. The baseline is then
+        <b>extrapolated</b> as a straight line under the peak to estimate the background
+        (non-faradaic) current that would flow if the redox reaction were not
+        occurring.</p>
         <ul>
-            <li>Oba punkty (x<sub>1</sub>, y<sub>1</sub>) i (x<sub>2</sub>, y<sub>2</sub>)
-            umieść na <b>płaskim, liniowym odcinku</b> woltamogramu poprzedzającym pik —
-            tam, gdzie prąd zmienia się liniowo z potencjałem i nie ma jeszcze
-            aktywności faradajowskiej.</li>
-            <li>Prosta łącząca te dwa punkty reprezentuje prąd niefaradajowski
-            (ładowanie podwójnej warstwy, tło rozpuszczalnika/elektrolitu) —
-            jest ekstrapolowana pod pik do położenia E<sub>p</sub>.</li>
-            <li>Wysokość piku H to odległość od piku do tej ekstrapolowanej linii
-            w położeniu maksimum, a nie do prostej łączącej punkty po obu stronach piku.</li>
-            <li>Oba punkty powinny leżeć na tej samej gałęzi woltamogramu
-            (narastającej lub opadającej) i wystarczająco blisko siebie, aby
-            zachować lokalne nachylenie tła.</li>
-            <li>W CVision możesz wybrać punkty dwukrotnym kliknięciem lub edytować
-            numerycznie w oknie „Edytuj linię bazową".</li>
+            <li>Place both points (x<sub>1</sub>, y<sub>1</sub>) and (x<sub>2</sub>, y<sub>2</sub>)
+            on a <b>flat, linear segment</b> of the voltammogram preceding the peak —
+            where the current changes linearly with potential and there is no
+            faradaic activity yet.</li>
+            <li>The straight line connecting these two points represents the
+            non-faradaic current (double-layer charging, solvent/electrolyte
+            background) — it is extrapolated under the peak to the position E<sub>p</sub>.</li>
+            <li>The peak height H is the distance from the peak to this extrapolated
+            line at the position of the maximum, not to a straight line connecting
+            points on both sides of the peak.</li>
+            <li>Both points should lie on the same branch of the voltammogram
+            (rising or falling) and be close enough together to preserve the local
+            slope of the background.</li>
+            <li>In CVision you can choose the points by double-clicking or edit them
+            numerically in the "Edit baseline (numeric)" window.</li>
         </ul>
 
-        <h3>Wpływ złego doboru linii bazowej</h3>
+        <h3>Effect of poor baseline point selection</h3>
         <ul>
-            <li><b>Punkty po obu stronach piku</b> — linia przecina pik zamiast stanowić
-            jego tło; wysokość H jest zaniżona, a jej wartość zależy arbitralnie od
-            wybranego zakresu.</li>
-            <li><b>Punkt w obszarze narastania piku</b> — ekstrapolacja jest nienaturalnie
-            skośna, pozorny pik lub brak piku.</li>
-            <li><b>Zbyt szeroki zakres obejmujący inne procesy</b> — nachylenie prostej
-            zaburzone przez sąsiedni pik, H zawyżone lub zaniżone.</li>
-            <li><b>Zbyt krótki odcinek liniowy</b> — punkty podatne na szum, duża
-            niepewność ekstrapolacji.</li>
+            <li><b>Points on both sides of the peak</b> — the line crosses the peak
+            instead of forming its background; the height H is underestimated, and
+            its value depends arbitrarily on the chosen range.</li>
+            <li><b>A point within the rising part of the peak</b> — the extrapolation
+            becomes unnaturally skewed, producing an apparent peak or no peak at all.</li>
+            <li><b>Too wide a range spanning other processes</b> — the slope of the
+            line is disturbed by a neighboring peak, overestimating or underestimating H.</li>
+            <li><b>Too short a linear segment</b> — the points are susceptible to
+            noise, leading to large extrapolation uncertainty.</li>
         </ul>
-        <p>Dobra praktyka: zawsze wizualnie zweryfikuj, czy ekstrapolowana linia
-        bazowa biegnie naturalnie pod pikiem, przed odczytem parametrów piku.</p>
+        <p>Good practice: always visually verify that the extrapolated baseline runs
+        naturally under the peak before reading off the peak parameters.</p>
         """,
 
         "theory_tab3_title_en": "Parametry piku",
