@@ -10,7 +10,7 @@ from PyQt6 import QtWidgets, QtGui, QtCore
 import pyqtgraph as pg
 
 from dialogs import (AxisSettingsDialog, BaselineSettingsDialog, PeakDetectionDialog,
-                     CalibrationDialog, CurveFittingDialog, ScanRateDialog)
+                     CalibrationDialog, CurveFittingDialog)
 from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
 from analysis import CalibrationSettings
@@ -32,16 +32,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_updating_baseline = False
         self.baseline_mode = None
         self.num_clicks = 0
-        self.charge_mode = None  # None, "oxidation", or "reduction" — mirrors baseline_mode
-        self.charge_click_count = 0
-        self.charge_x1 = None
-        self.charge_x2 = None
-        self.charge_region_oxidation = None
-        self.charge_region_reduction = None
-        self._pending_charge_kind = None
-        self.scan_rate_mv_s = None  # remembered v [mV/s], shared by Qa/Qc until clear_plot
-        self._charge_qa = None
-        self._charge_qc = None
         self.axis_settings = {
             'x_label': 'E [mV]',
             'y_label': 'I [μA]',
@@ -173,12 +163,6 @@ class MainWindow(QtWidgets.QMainWindow):
         btn_curve_fit = QtWidgets.QPushButton("Dopasowanie krzywej")
         btn_curve_fit.clicked.connect(self.open_curve_fitting_dialog)
         row.addWidget(btn_curve_fit)
-        btn_charge_qa = QtWidgets.QPushButton("Ładunek utleniania Qa (całka)")
-        btn_charge_qa.clicked.connect(self.pick_charge_oxidation_range)
-        row.addWidget(btn_charge_qa)
-        btn_charge_qc = QtWidgets.QPushButton("Ładunek redukcji Qc (całka)")
-        btn_charge_qc.clicked.connect(self.pick_charge_reduction_range)
-        row.addWidget(btn_charge_qc)
         self.combo_theme = QtWidgets.QComboBox()
         self.combo_theme.addItems(["Ciemny", "Jasny"])
         for i in range(self.combo_theme.count()):
@@ -350,19 +334,6 @@ class MainWindow(QtWidgets.QMainWindow):
         for item in self.auto_peak_scatter_items:
             self.plot_widget.removeItem(item)
         self.auto_peak_scatter_items = []
-        for item in [self.charge_region_oxidation, self.charge_region_reduction]:
-            if item is not None:
-                self.plot_widget.removeItem(item)
-        self.charge_region_oxidation = None
-        self.charge_region_reduction = None
-        self.charge_mode = None
-        self.charge_click_count = 0
-        self.charge_x1 = None
-        self.charge_x2 = None
-        self._pending_charge_kind = None
-        self.scan_rate_mv_s = None  # new file = ask for v again
-        self._charge_qa = None
-        self._charge_qc = None
         self.resultsTable.setRowCount(0)
         self.x = None
         self.raw_y1 = None
@@ -471,130 +442,26 @@ class MainWindow(QtWidgets.QMainWindow):
             "Kliknij dwa razy w obszar wykresu, aby wybrać punkty (x1,y1) oraz (x2,y2) dla redukcji."
         )
 
-    def pick_charge_oxidation_range(self):
-        """Aktywuje tryb wyboru przedziału całkowania ładunku Qa (utlenianie) poprzez 2x klik."""
-        if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw wczytaj plik danych.")
-            return
-        self.charge_mode = "oxidation"
-        self.charge_click_count = 0
-        QtWidgets.QMessageBox.information(
-            self, "Ładunek utleniania Qa",
-            "Kliknij dwa razy w obszar wykresu, aby wybrać lewą i prawą granicę "
-            "przedziału całkowania dla ładunku utleniania Qa."
-        )
-
-    def pick_charge_reduction_range(self):
-        """Aktywuje tryb wyboru przedziału całkowania ładunku Qc (redukcja) poprzez 2x klik."""
-        if self.x is None or self.raw_y2 is None:
-            QtWidgets.QMessageBox.warning(
-                self, "Brak danych", "Najpierw wczytaj plik danych z krzywą redukcji."
-            )
-            return
-        self.charge_mode = "reduction"
-        self.charge_click_count = 0
-        QtWidgets.QMessageBox.information(
-            self, "Ładunek redukcji Qc",
-            "Kliknij dwa razy w obszar wykresu, aby wybrać lewą i prawą granicę "
-            "przedziału całkowania dla ładunku redukcji Qc."
-        )
-
     def on_mouse_click(self, event):
-        """Obsługuje kliknięcia myszą do wyboru punktów linii bazowej lub przedziału całkowania ładunku."""
-        if self.baseline_mode is not None:
-            if self.x is None:
-                # Guard: no data loaded yet — np.interp would crash on None.
-                return
-            pos = event.scenePos()
-            mouse_point = self.plot_widget.getViewBox().mapSceneToView(pos)
-            x_click = mouse_point.x()
-            y_curve = float(np.interp(x_click, self.x, self.y1 if self.baseline_mode == "oxidation" else self.y2))
-            pt_key = 'x1' if self.num_clicks == 0 else 'x2'
-            self.baseline_settings[self.baseline_mode][pt_key] = x_click
-            self.baseline_settings[self.baseline_mode][pt_key.replace('x', 'y')] = y_curve
-            if self.num_clicks == 0:
-                self.num_clicks = 1
-            else:
-                self.num_clicks = 0
-                self.baseline_mode = None
-                self.update_baseline_lines()
+        """Obsługuje kliknięcia myszą w celu wyboru punktów dla linii bazowej."""
+        if self.baseline_mode is None:
             return
-
-        if self.charge_mode is not None:
-            if self.x is None:
-                # Guard: no data loaded yet.
-                return
-            pos = event.scenePos()
-            mouse_point = self.plot_widget.getViewBox().mapSceneToView(pos)
-            x_click = mouse_point.x()
-            if self.charge_click_count == 0:
-                self.charge_x1 = x_click
-                self.charge_click_count = 1
-            else:
-                self.charge_x2 = x_click
-                self.charge_click_count = 0
-                charge_kind = self.charge_mode
-                self.charge_mode = None
-                self._finalize_charge_range_selection(charge_kind)
-
-    def _finalize_charge_range_selection(self, charge_kind):
-        """Po drugim kliknięciu: sortuje granice, zaznacza przedział na wykresie i pyta o v."""
-        x_left, x_right = sorted([self.charge_x1, self.charge_x2])
-        self.charge_x1, self.charge_x2 = x_left, x_right
-
-        if charge_kind == "oxidation":
-            region_attr, brush = "charge_region_oxidation", (0, 0, 255, 60)
-        else:
-            region_attr, brush = "charge_region_reduction", (255, 0, 0, 60)
-        old_region = getattr(self, region_attr)
-        if old_region is not None:
-            self.plot_widget.removeItem(old_region)
-        new_region = pg.LinearRegionItem(values=[x_left, x_right], brush=brush, movable=False)
-        self.plot_widget.addItem(new_region)
-        setattr(self, region_attr, new_region)
-
-        self._pending_charge_kind = charge_kind
-        default_v = self.scan_rate_mv_s if self.scan_rate_mv_s is not None else 100.0
-        dialog = ScanRateDialog(initial_value=default_v, parent=self)
-        dialog.scan_rate_confirmed.connect(self._on_scan_rate_confirmed)
-        dialog.exec()
-
-    def _on_scan_rate_confirmed(self, scan_rate):
-        """Liczy Qa lub Qc (wg self._pending_charge_kind) po zatwierdzeniu szybkości skanowania v."""
-        self.scan_rate_mv_s = scan_rate  # remembered for the next charge calculation
-        charge_kind = self._pending_charge_kind
-
-        if charge_kind == "oxidation":
-            y_raw, baseline, label = self.raw_y1, self.baseline_settings['oxidation'], "Ładunek Qa [µC]"
-        else:
-            y_raw, baseline, label = self.raw_y2, self.baseline_settings['reduction'], "Ładunek Qc [µC]"
-
-        result = analysis.compute_charge(
-            self.x, y_raw, self.charge_x1, self.charge_x2, scan_rate,
-            baseline_x1=baseline['x1'], baseline_x2=baseline['x2']
-        )
-        if result is None:
-            QtWidgets.QMessageBox.warning(
-                self, "Zbyt mało danych",
-                "Wybrany przedział zawiera zbyt mało punktów danych, aby obliczyć ładunek."
-            )
+        if self.x is None:
+            # Guard: no data loaded yet — np.interp would crash on None.
             return
-
-        charge_magnitude = abs(result['charge_uC'])
-        if charge_kind == "oxidation":
-            self._charge_qa = charge_magnitude
+        pos = event.scenePos()
+        mouse_point = self.plot_widget.getViewBox().mapSceneToView(pos)
+        x_click = mouse_point.x()
+        y_curve = float(np.interp(x_click, self.x, self.y1 if self.baseline_mode == "oxidation" else self.y2))
+        pt_key = 'x1' if self.num_clicks == 0 else 'x2'
+        self.baseline_settings[self.baseline_mode][pt_key] = x_click
+        self.baseline_settings[self.baseline_mode][pt_key.replace('x', 'y')] = y_curve
+        if self.num_clicks == 0:
+            self.num_clicks = 1
         else:
-            self._charge_qc = charge_magnitude
-        self.insert_result_row(label, charge_magnitude, "", "", "")
-        status_text = f"{label} = {charge_magnitude:.3f} µC"
-
-        if self._charge_qa is not None and self._charge_qc is not None and self._charge_qc != 0:
-            ratio = self._charge_qa / self._charge_qc
-            self.insert_result_row("Qa/Qc", ratio, "", "", "")
-            status_text += f"   |   Qa/Qc = {ratio:.3f}"
-
-        self.statusBar().showMessage(status_text)
-        QtWidgets.QMessageBox.information(self, "Ładunek", status_text.replace("   |   ", "\n"))
+            self.num_clicks = 0
+            self.baseline_mode = None
+            self.update_baseline_lines()
 
     def update_axis_settings(self):
         """Aktualizuje etykiety oraz zakresy osi wykresu."""
