@@ -1041,40 +1041,42 @@ TRANSLATIONS = {
         are used to filter out noise and insignificant local extrema.</p>
         """,
 
-        "theory_tab4_title_en": "Pochodne i miejsca zerowe",
+        "theory_tab4_title_en": "Derivatives and zero-crossings",
         "theory_tab4_html_en": """
-        <h3>Po co obliczać pochodną woltamogramu</h3>
-        <p>Pochodne pomagają precyzyjnie zlokalizować cechy woltamogramu niewidoczne
-        „gołym okiem" na surowym sygnale — szczególnie gdy piki są słabo
-        rozdzielone, asymetryczne, lub proces jest nieodwracalny.</p>
+        <h3>Why compute the derivative of a voltammogram</h3>
+        <p>Derivatives help precisely locate voltammogram features that are not visible
+        "by eye" in the raw signal — especially when peaks are poorly resolved,
+        asymmetric, or the process is irreversible.</p>
 
-        <h3>Pierwsza pochodna dI/dE</h3>
+        <h3>First derivative dI/dE</h3>
         <ul>
-            <li>Miejsce zerowe pierwszej pochodnej odpowiada ekstremum prądu:
-            <b>dI/dE = 0</b> → maksimum (pik utleniania) lub minimum (pik redukcji).</li>
-            <li>Pozwala znaleźć dokładne E<sub>p</sub> bez wizualnego odgadywania.</li>
+            <li>A zero-crossing of the first derivative corresponds to a current extremum:
+            <b>dI/dE = 0</b> → maximum (oxidation peak) or minimum (reduction peak).</li>
+            <li>Allows the exact E<sub>p</sub> to be found without visual guesswork.</li>
         </ul>
 
-        <h3>Druga pochodna d²I/dE²</h3>
+        <h3>Second derivative d²I/dE²</h3>
         <ul>
-            <li>Miejsca zerowe drugiej pochodnej oznaczają punkty przegięcia krzywej CV —
-            przydatne dla procesów <b>nieodwracalnych</b>, gdzie klasyczny pik nie tworzy
-            wyraźnego maksimum (np. elektroutlenianie organiki).</li>
-            <li>Pozwala oszacować potencjał półfalowy nawet przy braku piku redukcyjnego.</li>
+            <li>Zero-crossings of the second derivative mark the inflection points of
+            the CV curve — useful for <b>irreversible</b> processes, where the classic
+            peak does not form a clear maximum (e.g., electro-oxidation of organics).</li>
+            <li>Allows the half-wave potential to be estimated even in the absence of a
+            reduction peak.</li>
         </ul>
 
-        <h3>Wygładzanie Savitzky-Golay</h3>
-        <p>Pochodne wzmacniają szum. Przed ich obliczaniem warto wygładzić sygnał filtrem
-        Savitzky-Golay, który lokalnie dopasowuje wielomian niskiego stopnia metodą
-        najmniejszych kwadratów, zachowując kształt piku lepiej niż średnia krocząca.</p>
-        <p><b>Dobór parametrów:</b></p>
+        <h3>Savitzky-Golay smoothing</h3>
+        <p>Derivatives amplify noise. Before computing them, it is worth smoothing the
+        signal with a Savitzky-Golay filter, which locally fits a low-degree polynomial
+        by least squares, preserving the peak shape better than a moving average.</p>
+        <p><b>Choosing the parameters:</b></p>
         <ul>
-            <li><b>Okno</b> (liczba nieparzysta): im większe, tym silniejsze wygładzanie,
-            ale ryzyko spłaszczenia piku. W praktyce 7–15 punktów dla typowego CV.</li>
-            <li><b>Stopień wielomianu</b>: 2 lub 3 dla typowych kształtów, 4–5 dla
-            bardziej złożonych sygnałów. Musi być <b>mniejszy</b> niż okno.</li>
-            <li>Złota zasada: zwiększaj okno tylko na tyle, aby usunąć szum, i sprawdź,
-            czy amplituda piku nie spada.</li>
+            <li><b>Window</b> (an odd number): the larger it is, the stronger the
+            smoothing, but with a risk of flattening the peak. In practice, 7–15 points
+            for a typical CV.</li>
+            <li><b>Polynomial order</b>: 2 or 3 for typical shapes, 4–5 for more
+            complex signals. Must be <b>smaller</b> than the window.</li>
+            <li>Golden rule: increase the window only as much as needed to remove
+            noise, and check that the peak amplitude does not decrease.</li>
         </ul>
         """,
 
