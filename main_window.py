@@ -36,17 +36,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_updating_baseline = False
         self.baseline_mode = None
         self.num_clicks = 0
+        self.calibration_settings = CalibrationSettings()
+        self.current_unit_label = "μA"
         self.axis_settings = {
             'x_label': self.tr_('axis_x'),
-            'y_label': 'I [μA]',
+            'y_label': f"{self.tr_('axis_y_current')} [{self.current_unit_label}]",
             'x_min': 0,
             'x_max': 10,
             'y_min': 0,
             'y_max': 10,
             'font': QtGui.QFont("Arial", 12)
         }
-        self.calibration_settings = CalibrationSettings()
-        self.current_unit_label = "μA"
         self.update_axis_settings()
         self.baseline_settings = {
             'oxidation': {'x1': 0, 'y1': 0, 'x2': 10, 'y2': 0},
@@ -408,10 +408,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.baseline_line_oxidation = None
             self.baseline_line_reduction = None
             self.curve_oxidation = self.plot_widget.plot(
-                self.x, self.y1, pen=pg.mkPen(color='b', width=2), name='Utlenianie'
+                self.x, self.y1, pen=pg.mkPen(color='b', width=2), name=self.tr_('combo_oxidation')
             )
             self.curve_reduction = self.plot_widget.plot(
-                self.x, self.y2, pen=pg.mkPen(color='r', width=2), name='Redukcja'
+                self.x, self.y2, pen=pg.mkPen(color='r', width=2), name=self.tr_('combo_reduction')
             )
         else:
             # Subsequent smoothing changes: update data in-place to preserve zoom/pan.
@@ -589,8 +589,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_axis_settings(self):
         """Aktualizuje etykiety oraz zakresy osi wykresu."""
-        x_label = self.axis_settings.get('x_label', 'Oś X')
-        y_label = self.axis_settings.get('y_label', 'Prąd')
+        x_label = self.axis_settings.get('x_label', self.tr_('axis_default_x'))
+        y_label = self.axis_settings.get('y_label', self.tr_('axis_y_current'))
         font = self.axis_settings.get('font', QtGui.QFont("Arial", 12))
         self.plot_widget.setLabel('bottom', text=x_label, **{'font': font})
         self.plot_widget.setLabel('left', text=y_label, **{'font': font})
@@ -625,7 +625,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.baseline_line_oxidation = self.plot_widget.plot(
                 [x1_ox, x2_ox], [y1_ox, y2_ox],
                 pen=pg.mkPen(color='b', width=2, style=QtCore.Qt.PenStyle.DashLine),
-                name="Baseline Utlenienia"
+                name=self.tr_('legend_baseline_ox')
             )
         else:
             self.baseline_line_oxidation.setData([x1_ox, x2_ox], [y1_ox, y2_ox])
@@ -649,7 +649,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.baseline_line_reduction = self.plot_widget.plot(
                 [x1_red, x2_red], [y1_red, y2_red],
                 pen=pg.mkPen(color='r', width=2, style=QtCore.Qt.PenStyle.DashLine),
-                name="Baseline Redukcji"
+                name=self.tr_('legend_baseline_red')
             )
         else:
             self.baseline_line_reduction.setData([x1_red, x2_red], [y1_red, y2_red])
@@ -707,7 +707,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Compute one peak (oxidation or reduction), draw its Qt annotations, and insert a table row.
 
         Returns the analysis result dict (with x_peak, y_peak, baseline_val, height/depth,
-        x_region, peak_height_curve, summary), or None when no data falls in the region.
+        x_region, peak_height_curve), or None when no data falls in the region.
         The relevant PlotDataItem/TextItem references are stored as instance attributes.
 
         On success, this also switches that baseline's LinearRegionItem into "post-peak"
@@ -718,6 +718,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if mode == 'oxidation':
             result = analysis.compute_oxidation_peak(self.x, y_data, baseline_settings)
             label, text_color, line_color = "Utlenienie", 'b', 'b'
+            annot_label = self.tr_('annot_oxidation')
             h_key, ip_name = 'height', "Ip,a"
             ip_y = lambda r: [r['baseline_val'], r['y_peak']]
             fill_brush = (0, 0, 255, 60)
@@ -725,6 +726,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             result = analysis.compute_reduction_peak(self.x, y_data, baseline_settings)
             label, text_color, line_color = "Redukcja", 'r', 'r'
+            annot_label = self.tr_('annot_reduction')
             h_key, ip_name = 'depth', "Ip,c"
             ip_y = lambda r: [r['y_peak'], r['baseline_val']]
             fill_brush = (255, 0, 0, 60)
@@ -734,7 +736,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return None
 
         h_or_d = result[h_key]
-        text = (f"{label}:\nx_peak = {result['x_peak']:.3f}\ny_peak = {result['y_peak']:.3f}\n"
+        text = (f"{annot_label}:\nx_peak = {result['x_peak']:.3f}\ny_peak = {result['y_peak']:.3f}\n"
                 f"baseline = {result['baseline_val']:.3f}\n{h_key} = {h_or_d:.3f}")
         peak_text = pg.TextItem(text=text, color=text_color, anchor=(0.5, -1.0))
         peak_text.setPos(result['x_peak'], result['y_peak'])

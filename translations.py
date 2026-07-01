@@ -43,6 +43,11 @@ TRANSLATIONS = {
         "combo_oxidation": "Utlenianie",
         "combo_reduction": "Redukcja",
 
+        "legend_baseline_ox": "Baseline Utlenienia",
+        "legend_baseline_red": "Baseline Redukcji",
+        "annot_oxidation": "Utlenienie",
+        "annot_reduction": "Redukcja",
+
         "combo_theme_dark": "Ciemny",
         "combo_theme_light": "Jasny",
 
@@ -618,6 +623,11 @@ TRANSLATIONS = {
 
         "combo_oxidation": "Oxidation",
         "combo_reduction": "Reduction",
+
+        "legend_baseline_ox": "Oxidation baseline",
+        "legend_baseline_red": "Reduction baseline",
+        "annot_oxidation": "Oxidation",
+        "annot_reduction": "Reduction",
 
         "combo_theme_dark": "Dark",
         "combo_theme_light": "Light",
