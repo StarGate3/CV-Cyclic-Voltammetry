@@ -888,11 +888,16 @@ class MainWindow(QtWidgets.QMainWindow):
             <p><b>3. Wygładzenie</b><br/>
             •! <i>W tym miejscu ustawienie wygładzania jest opcjonalne i zależy od jakości danych.</i><br/>
             • Zaznacz „Wygładzanie (Savitzky-Golay)".<br/>
+            • <b>Okno</b>: liczba punktów uśrednianych przy wygładzaniu (musi być nieparzysta).
+            <b>Stopień</b>: rząd wielomianu dopasowywanego lokalnie w oknie (typowo 2–3;
+            musi być mniejszy niż okno).<br/>
             <i>Uwaga:</i> niezalecane jest zwiększanie okna powyżej 15.</p>
 
             <p><b>4. Wybór linii bazowej</b><br/>
-            <b>Utlenianie</b>: Kliknij „Zakres utlenienia (2× klik)" i wskaż dwa punkty.
-            <b>Redukcja</b>: Kliknij „Zakres redukcji (2× klik)" i wskaż dwa punkty.
+            Linię bazową można ustawić lub skorygować na trzy sposoby:</p>
+            <p>• <b>Dwukrotne kliknięcie:</b> <b>Utlenianie</b>: Kliknij „Zakres utlenienia
+            (2× klik)" i wskaż dwa punkty. <b>Redukcja</b>: Kliknij „Zakres redukcji (2× klik)"
+            i wskaż dwa punkty.
 
             <b>Oba punkty</b> umieść na <b>liniowym fragmencie woltamogramu PRZED narastaniem piku</b>
             (po lewej stronie piku) — tam, gdzie prąd zmienia się liniowo i nie ma jeszcze aktywności redoks.
@@ -900,24 +905,52 @@ class MainWindow(QtWidgets.QMainWindow):
             <b>ekstrapolowana</b> pod pik, aby oszacować linię bazową w położeniu maksimum.
             Nie umieszczaj punktów po obu stronach piku — linia przecinałaby wtedy pik zamiast
             stanowić jego tło, co zafałszuje wysokość H.</p>
+            <p>• <b>Przeciąganie myszą:</b> kolorowy pas bazy można chwycić klikając na jego pole
+            i przesunąć go w całości, a następnie dostroić zakres precyzyjnie, przeciągając
+            pionowe krawędzie (linie brzegowe) pasa.</p>
+            <p>• <b>Dialog numeryczny „Edytuj linię bazową (numerycznie)":</b> pozwala wpisać
+            wartości potencjału dla krawędzi zakresu. W praktyce: dla utleniania ustawia się
+            prawą i lewą krawędź tak, aby zakres sięgał POZA maksimum piku; dla redukcji
+            analogicznie (kluczowe jest, aby zakres bazy znalazł się poza maksimum piku).
+            Wartości dobiera się orientacyjnie ("na oko"), pilnując, by baza obejmowała obszar
+            poza pikiem.</p>
 
             <p><b>5. Obliczenie parametrów piku</b><br/>
-            Kliknij „Oblicz parametry piku". Program wyznaczy x_peak, y_peak, linię bazową, wysokość/głębokość piku i E₁/₂,
-            a wyniki wyświetli na wykresie i w tabeli.</p>
+            Kliknij „Oblicz parametry piku". Program wyznaczy x_peak, y_peak, linię bazową
+            oraz wysokość/głębokość piku dla każdej z krzywych, a wyniki wyświetli na wykresie
+            i w tabeli. Gdy policzone zostaną OBA piki (utlenianie i redukcja), w tabeli
+            dodatkowo pojawią się: <b>E½</b> (potencjał półfalowy), <b>ΔEp</b> (rozdzielenie
+            potencjałów pików, |E<sub>p,a</sub> − E<sub>p,c</sub>| — parametr odwracalności)
+            oraz <b>Ipa/Ipc</b> (stosunek prądów pików anodowego i katodowego — również
+            parametr odwracalności).</p>
+            <p><i>Wizualizacja bazy po obliczeniu:</i> po kliknięciu tego przycisku kolorowy
+            pas linii bazowej traci wypełnienie (krawędzie pozostają widoczne i przeciągalne),
+            a w jego miejsce pojawia się wypełnienie obszaru między krzywą a linią bazową
+            (pod krzywą utleniania / nad krzywą redukcji) — co czytelnie pokazuje wysokość
+            piku. Przeciągnięcie krawędzi bazy, ponowny wybór zakresu (2× klik) lub użycie
+            dialogu numerycznego przywraca tryb edycji (pas z wypełnieniem wraca).</p>
 
-            <p><b>6. Druga pochodna (procesy nieodwracalne)</b><br/>
+            <p><b>6. Pierwsza pochodna</b><br/>
+            • Kliknij „Oblicz pochodną".<br/>
+            • Pierwsza pochodna pomaga precyzyjnie zlokalizować ekstrema woltamogramu: miejsca,
+            w których pochodna przecina zero, odpowiadają wierzchołkom pików (utleniania
+            i redukcji).<br/>
+            • Podaj zakres poszukiwania miejsc zerowych i kliknij „Znajdź miejsca zerowe" –
+            punkty zostaną pokazane na wykresie i zapisane w tabeli.</p>
+
+            <p><b>7. Druga pochodna (procesy nieodwracalne)</b><br/>
             • Kliknij „Oblicz drugą pochodną".<br/>
             • Opcja wygładzania jest opcjonalna, ale zalecana.<br/>
             • Podaj zakres poszukiwania miejsc zerowych.<br/>
             • Kliknij „Znajdź miejsca zerowe" – punkty zostaną pokazane na wykresie i zapisane w tabeli.</p>
 
-            <p><b>7. Eksport do Excela</b><br/>
+            <p><b>8. Eksport do Excela</b><br/>
             Kliknij „Eksport do Excela", wybierz nazwę pliku.
             Zapisane zostaną: surowe dane, dane wygładzone, pochodne, miejsca zerowe, wyniki piku i wykres.</p>
 
             <hr/>
 
-            <p><b>8. Automatyczne wykrywanie pików</b><br/>
+            <p><b>9. Automatyczne wykrywanie pików</b><br/>
             • Kliknij „Wykryj piki automatycznie".<br/>
             • <b>Minimalna wysokość piku</b>: filtruje szum — tylko piki o amplitudzie
             większej lub równej tej wartości zostaną uznane za pik. Ustaw 0, aby wyłączyć filtr.<br/>
@@ -928,7 +961,7 @@ class MainWindow(QtWidgets.QMainWindow):
             • Wykryte piki są nanoszone na wykres jako <b>żółte kółka</b> oraz
             dopisywane do tabeli wyników jako „Pik auto (utl)" / „Pik auto (red)".</p>
 
-            <p><b>9. Kalibracja jednostek</b><br/>
+            <p><b>10. Kalibracja jednostek</b><br/>
             • Kliknij „Kalibracja jednostek".<br/>
             • Podaj <b>powierzchnię elektrody</b> [cm²] oraz/lub <b>stężenie analitu</b> [mM].<br/>
             • Zaznacz odpowiednie checkboxy, aby znormalizować prąd.
@@ -942,7 +975,7 @@ class MainWindow(QtWidgets.QMainWindow):
             jest zawsze stosowana jako krok post-processing.<br/>
             • Aktywna kalibracja jest widoczna w prawej części paska stanu.</p>
 
-            <p><b>10. Dopasowanie krzywej</b><br/>
+            <p><b>11. Dopasowanie krzywej</b><br/>
             • Kliknij „Dopasowanie krzywej".<br/>
             • Wybierz <b>model</b>: Gaussowski (piki symetryczne, dyfuzyjne),
             Lorentzowski (piki z szerokimi ogonami, np. szybkie procesy kinetyczne),
