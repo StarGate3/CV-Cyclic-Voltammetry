@@ -1,11 +1,20 @@
 """
 Moduł translations.py
 ----------------------
-Słowniki tłumaczeń UI (PL/EN). Czysty moduł danych — brak zależności od Qt ani od reszty
-programu. Etap 0: klucze toolbara (trzy rzędy, w tym Help/Teoria/About jako zwykłe
-przyciski), obu combo (motyw, pomiar) i tytułu okna. Etap 1a: etykiety Okno/Stopień,
-nagłówki tabeli wyników, tytuł wykresu i domyślne etykiety osi. Kolejne etapy dołożą
-resztę kluczy (dialogi, komunikaty błędów, treść Help/Teoria/About).
+Słowniki tłumaczeń UI (PL/EN) oraz wspólny mechanizm tłumaczenia dla całego programu
+(główne okno i dialogi). Etap 0: klucze toolbara (trzy rzędy, w tym Help/Teoria/About jako
+zwykłe przyciski), obu combo (motyw, pomiar) i tytułu okna. Etap 1a: etykiety Okno/Stopień,
+nagłówki tabeli wyników, tytuł wykresu i domyślne etykiety osi. Etap 1b-1: proste dialogi
+(PeakDetectionDialog, AxisSettingsDialog, okna pochodnych). Kolejne etapy dołożą resztę
+kluczy (pozostałe dialogi, komunikaty błędów, treść Help/Teoria/About).
+
+Mechanizm bieżącego języka: MainWindow trzyma swój własny `self.current_language` (bo
+retranslate_ui() go potrzebuje), ale dialogi to osobne klasy bez dostępu do MainWindow —
+nie mogą wołać `self.tr_`. Dlatego bieżący język jest też trzymany tu, modułowo
+(`_current_language`), aktualizowany przez `set_language()` w tych samych miejscach, gdzie
+zmienia się `self.current_language` w main_window.py. Dialogi wołają `tr(key)` przy budowie
+UI i odczytują ten sam, aktualny język — jedno źródło prawdy, zsynchronizowane przez
+`set_language()`.
 """
 
 TRANSLATIONS = {
@@ -50,6 +59,37 @@ TRANSLATIONS = {
         "col_ypeak": "y_peak",
         "col_baseline": "Baseline",
         "col_hd": "H/D",
+
+        "dlg_peakdet_title": "Automatyczne wykrywanie pików",
+        "lbl_min_height": "Minimalna wysokość piku:",
+        "lbl_min_distance": "Minimalna odległość między pikami:",
+        "suffix_datapoints": " punktów danych",
+        "chk_detect_ox": "Zakres utlenienia",
+        "chk_detect_red": "Zakres redukcji",
+
+        "dlg_axis_title": "Ustawienia osi",
+        "lbl_axis_x_label": "Etykieta osi X:",
+        "lbl_axis_y_label": "Etykieta osi Y:",
+        "lbl_axis_x_range": "Zakres osi X:",
+        "lbl_axis_y_range": "Zakres osi Y:",
+        "lbl_font": "Czcionka:",
+        "lbl_min": "Min:",
+        "lbl_max": "Max:",
+        "btn_choose_font": "Wybierz czcionkę",
+        "axis_default_x": "Oś X",
+        "axis_default_y": "Wartości",
+
+        "dlg_deriv_title": "Pochodne utlenienia i redukcji",
+        "dlg_deriv2_title": "Druga pochodna utlenienia i redukcji",
+        "plot_deriv_title": "Wykres pochodnych",
+        "plot_deriv2_title": "Wykres drugiej pochodnej",
+        "legend_deriv_ox": "Pochodna utleniania",
+        "legend_deriv_red": "Pochodna redukcji",
+        "legend_deriv2_ox": "Druga pochodna utleniania",
+        "legend_deriv2_red": "Druga pochodna redukcji",
+        "lbl_zero_range_from": "Zakres miejsc zerowych od:",
+        "lbl_zero_range_to": "do:",
+        "btn_find_zeros": "Znajdź miejsca zerowe",
     },
     "en": {
         "window_title": "CVision: Cyclic Voltammogram Analysis",
@@ -92,5 +132,64 @@ TRANSLATIONS = {
         "col_ypeak": "y_peak",
         "col_baseline": "Baseline",
         "col_hd": "H/D",
+
+        "dlg_peakdet_title": "Automatic peak detection",
+        "lbl_min_height": "Minimum peak height:",
+        "lbl_min_distance": "Minimum distance between peaks:",
+        "suffix_datapoints": " data points",
+        "chk_detect_ox": "Oxidation range",
+        "chk_detect_red": "Reduction range",
+
+        "dlg_axis_title": "Axis settings",
+        "lbl_axis_x_label": "X axis label:",
+        "lbl_axis_y_label": "Y axis label:",
+        "lbl_axis_x_range": "X axis range:",
+        "lbl_axis_y_range": "Y axis range:",
+        "lbl_font": "Font:",
+        "lbl_min": "Min:",
+        "lbl_max": "Max:",
+        "btn_choose_font": "Choose font",
+        "axis_default_x": "X axis",
+        "axis_default_y": "Values",
+
+        "dlg_deriv_title": "Oxidation and reduction derivatives",
+        "dlg_deriv2_title": "Second derivative of oxidation and reduction",
+        "plot_deriv_title": "Derivative plot",
+        "plot_deriv2_title": "Second derivative plot",
+        "legend_deriv_ox": "Oxidation derivative",
+        "legend_deriv_red": "Reduction derivative",
+        "legend_deriv2_ox": "Second oxidation derivative",
+        "legend_deriv2_red": "Second reduction derivative",
+        "lbl_zero_range_from": "Zero-crossing range from:",
+        "lbl_zero_range_to": "to:",
+        "btn_find_zeros": "Find zero-crossings",
     },
 }
+
+
+_current_language = "pl"
+
+
+def set_language(lang):
+    """Ustawia bieżący język modułu (widoczny globalnie dla tr()/translate())."""
+    global _current_language
+    _current_language = lang
+
+
+def get_language():
+    """Zwraca aktualnie ustawiony język modułu."""
+    return _current_language
+
+
+def translate(key, lang):
+    """Zwraca tekst dla klucza w podanym języku; brakujący klucz -> sam klucz."""
+    return TRANSLATIONS[lang].get(key, key)
+
+
+def tr(key):
+    """Zwraca tekst dla klucza w bieżącym języku modułu (ustawianym przez set_language()).
+
+    Używane przez dialogi (dialogs.py, derivative_windows.py), które nie mają dostępu do
+    MainWindow.tr_ — czytają ten sam, współdzielony stan języka.
+    """
+    return translate(key, _current_language)

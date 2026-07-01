@@ -11,6 +11,7 @@ from PyQt6 import QtWidgets
 import pyqtgraph as pg
 from scipy.signal import savgol_filter
 from utils import compute_zero_crossings
+from translations import tr
 
 
 class BaseDerivativeWindow(QtWidgets.QDialog):
@@ -52,18 +53,18 @@ class BaseDerivativeWindow(QtWidgets.QDialog):
 
         # Kontrolki wygładzania
         controls_layout = QtWidgets.QHBoxLayout()
-        self.smoothingCheckBox = QtWidgets.QCheckBox("Wygładzanie (Savitzky-Golay)")
+        self.smoothingCheckBox = QtWidgets.QCheckBox(tr("check_smoothing"))
         self.smoothingCheckBox.setChecked(True)
         self.smoothingCheckBox.stateChanged.connect(self.update_plot)
         controls_layout.addWidget(self.smoothingCheckBox)
-        controls_layout.addWidget(QtWidgets.QLabel("Okno:"))
+        controls_layout.addWidget(QtWidgets.QLabel(tr("label_window")))
         self.windowSpinBox = QtWidgets.QSpinBox()
         self.windowSpinBox.setRange(3, 101)
         self.windowSpinBox.setSingleStep(2)
         self.windowSpinBox.setValue(15)
         self.windowSpinBox.valueChanged.connect(self.update_plot)
         controls_layout.addWidget(self.windowSpinBox)
-        controls_layout.addWidget(QtWidgets.QLabel("Stopień:"))
+        controls_layout.addWidget(QtWidgets.QLabel(tr("label_polyorder")))
         self.polySpinBox = QtWidgets.QSpinBox()
         self.polySpinBox.setRange(1, 5)
         self.polySpinBox.setValue(3)
@@ -73,19 +74,19 @@ class BaseDerivativeWindow(QtWidgets.QDialog):
 
         # Kontrolki zakresu zerowania
         intersection_layout = QtWidgets.QHBoxLayout()
-        intersection_layout.addWidget(QtWidgets.QLabel("Zakres miejsc zerowych od:"))
+        intersection_layout.addWidget(QtWidgets.QLabel(tr("lbl_zero_range_from")))
         self.intMinSpin = QtWidgets.QDoubleSpinBox()
         self.intMinSpin.setRange(-1e9, 1e9)
         self.intMinSpin.setDecimals(3)
         self.intMinSpin.setValue(np.min(self.x))
         intersection_layout.addWidget(self.intMinSpin)
-        intersection_layout.addWidget(QtWidgets.QLabel("do:"))
+        intersection_layout.addWidget(QtWidgets.QLabel(tr("lbl_zero_range_to")))
         self.intMaxSpin = QtWidgets.QDoubleSpinBox()
         self.intMaxSpin.setRange(-1e9, 1e9)
         self.intMaxSpin.setDecimals(3)
         self.intMaxSpin.setValue(np.max(self.x))
         intersection_layout.addWidget(self.intMaxSpin)
-        self.findIntButton = QtWidgets.QPushButton("Znajdź miejsca zerowe")
+        self.findIntButton = QtWidgets.QPushButton(tr("btn_find_zeros"))
         self.findIntButton.clicked.connect(self.find_intersections)
         intersection_layout.addWidget(self.findIntButton)
         main_layout.addLayout(intersection_layout)
@@ -172,10 +173,10 @@ class DerivativeWindow(BaseDerivativeWindow):
 
     def __init__(self, x, deriv_y1, deriv_y2, parent=None):
         super().__init__(
-            window_title="Pochodne utlenienia i redukcji",
-            plot_title="Wykres pochodnych",
-            legend_name1="Pochodna utleniania",
-            legend_name2="Pochodna redukcji",
+            window_title=tr("dlg_deriv_title"),
+            plot_title=tr("plot_deriv_title"),
+            legend_name1=tr("legend_deriv_ox"),
+            legend_name2=tr("legend_deriv_red"),
             x=x, y1=deriv_y1, y2=deriv_y2,
             parent=parent,
         )
@@ -186,10 +187,10 @@ class SecondDerivativeWindow(BaseDerivativeWindow):
 
     def __init__(self, x, second_deriv_y1, second_deriv_y2, parent=None):
         super().__init__(
-            window_title="Druga pochodna utlenienia i redukcji",
-            plot_title="Wykres drugiej pochodnej",
-            legend_name1="Druga pochodna utleniania",
-            legend_name2="Druga pochodna redukcji",
+            window_title=tr("dlg_deriv2_title"),
+            plot_title=tr("plot_deriv2_title"),
+            legend_name1=tr("legend_deriv2_ox"),
+            legend_name2=tr("legend_deriv2_red"),
             x=x, y1=second_deriv_y1, y2=second_deriv_y2,
             parent=parent,
         )

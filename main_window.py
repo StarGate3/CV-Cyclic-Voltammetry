@@ -15,7 +15,7 @@ from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
 from analysis import CalibrationSettings
 import export as _export_module
-from translations import TRANSLATIONS
+from translations import translate, set_language
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -25,6 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.current_language = "pl"  # set early so retranslate_ui() can use it right away
+        set_language(self.current_language)  # keep the module-level language (dialogs) in sync
         self.setWindowTitle(self.tr_("window_title"))
         self.E_half_line = None
         self._e_half_value = None  # stores full-precision E½ for export (BUG-07)
@@ -244,8 +245,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.plot_widget.setStyleSheet("border: 1px solid black;")
 
     def tr_(self, key):
-        """Zwraca tekst dla klucza w self.current_language; brakujący klucz -> sam klucz."""
-        return TRANSLATIONS[self.current_language].get(key, key)
+        """Zwraca tekst dla klucza w self.current_language; brakujący klucz -> sam klucz.
+
+        Deleguje do translations.translate(), żeby główne okno i dialogi (które wołają
+        translations.tr() bezpośrednio) czytały z jednego, wspólnego źródła prawdy.
+        """
+        return translate(key, self.current_language)
 
     def on_language_changed(self, index):
         """Przełącza język UI na podstawie indeksu combo_language (0=pl, 1=en), nie tekstu.
@@ -254,6 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
         działania apply_theme (który porównywał widoczny tekst pozycji).
         """
         self.current_language = "pl" if index == 0 else "en"
+        set_language(self.current_language)  # keep the module-level language (dialogs) in sync
         self.retranslate_ui()
 
     def _set_combo_item_texts(self, combo, texts):

@@ -11,6 +11,7 @@ import pyqtgraph as pg
 from PyQt6 import QtWidgets, QtGui, QtCore
 
 from analysis import CalibrationSettings, apply_calibration, fit_peak
+from translations import tr
 
 
 class AxisSettingsDialog(QtWidgets.QDialog):
@@ -24,17 +25,17 @@ class AxisSettingsDialog(QtWidgets.QDialog):
         Inicjalizacja dialogu z aktualnymi ustawieniami.
         """
         super().__init__(parent)
-        self.setWindowTitle("Ustawienia osi")
+        self.setWindowTitle(tr("dlg_axis_title"))
         self.current_settings = current_settings
         self.init_ui()
 
     def init_ui(self):
         """Tworzy interfejs dialogu z polami do edycji ustawień osi."""
         layout = QtWidgets.QFormLayout(self)
-        self.x_label_edit = QtWidgets.QLineEdit(self.current_settings.get('x_label', 'Oś X'))
-        layout.addRow("Etykieta osi X:", self.x_label_edit)
-        self.y_label_edit = QtWidgets.QLineEdit(self.current_settings.get('y_label', 'Wartości'))
-        layout.addRow("Etykieta osi Y:", self.y_label_edit)
+        self.x_label_edit = QtWidgets.QLineEdit(self.current_settings.get('x_label', tr('axis_default_x')))
+        layout.addRow(tr("lbl_axis_x_label"), self.x_label_edit)
+        self.y_label_edit = QtWidgets.QLineEdit(self.current_settings.get('y_label', tr('axis_default_y')))
+        layout.addRow(tr("lbl_axis_y_label"), self.y_label_edit)
 
         # Ustawienia zakresu osi X
         self.x_min_spin = QtWidgets.QDoubleSpinBox()
@@ -46,11 +47,11 @@ class AxisSettingsDialog(QtWidgets.QDialog):
         self.x_max_spin.setDecimals(3)
         self.x_max_spin.setValue(self.current_settings.get('x_max', 10))
         x_range_layout = QtWidgets.QHBoxLayout()
-        x_range_layout.addWidget(QtWidgets.QLabel("Min:"))
+        x_range_layout.addWidget(QtWidgets.QLabel(tr("lbl_min")))
         x_range_layout.addWidget(self.x_min_spin)
-        x_range_layout.addWidget(QtWidgets.QLabel("Max:"))
+        x_range_layout.addWidget(QtWidgets.QLabel(tr("lbl_max")))
         x_range_layout.addWidget(self.x_max_spin)
-        layout.addRow("Zakres osi X:", x_range_layout)
+        layout.addRow(tr("lbl_axis_x_range"), x_range_layout)
 
         # Ustawienia zakresu osi Y
         self.y_min_spin = QtWidgets.QDoubleSpinBox()
@@ -62,21 +63,21 @@ class AxisSettingsDialog(QtWidgets.QDialog):
         self.y_max_spin.setDecimals(3)
         self.y_max_spin.setValue(self.current_settings.get('y_max', 10))
         y_range_layout = QtWidgets.QHBoxLayout()
-        y_range_layout.addWidget(QtWidgets.QLabel("Min:"))
+        y_range_layout.addWidget(QtWidgets.QLabel(tr("lbl_min")))
         y_range_layout.addWidget(self.y_min_spin)
-        y_range_layout.addWidget(QtWidgets.QLabel("Max:"))
+        y_range_layout.addWidget(QtWidgets.QLabel(tr("lbl_max")))
         y_range_layout.addWidget(self.y_max_spin)
-        layout.addRow("Zakres osi Y:", y_range_layout)
+        layout.addRow(tr("lbl_axis_y_range"), y_range_layout)
 
         # Wybór czcionki
         self.font = self.current_settings.get('font', QtGui.QFont("Arial", 12))
-        self.font_button = QtWidgets.QPushButton("Wybierz czcionkę")
+        self.font_button = QtWidgets.QPushButton(tr("btn_choose_font"))
         self.font_button.clicked.connect(self.choose_font)
         self.font_label = QtWidgets.QLabel(self.font.toString())
         font_layout = QtWidgets.QHBoxLayout()
         font_layout.addWidget(self.font_button)
         font_layout.addWidget(self.font_label)
-        layout.addRow("Czcionka:", font_layout)
+        layout.addRow(tr("lbl_font"), font_layout)
 
         # Przyciski OK, Anuluj, Apply
         self.button_box = QtWidgets.QDialogButtonBox(
@@ -92,7 +93,7 @@ class AxisSettingsDialog(QtWidgets.QDialog):
 
     def choose_font(self):
         """Otwiera okno wyboru czcionki i aktualizuje etykietę czcionki."""
-        font, ok = QtWidgets.QFontDialog.getFont(self.font, self, "Wybierz czcionkę")
+        font, ok = QtWidgets.QFontDialog.getFont(self.font, self, tr("btn_choose_font"))
         if ok:
             self.font = font
             self.font_label.setText(self.font.toString())
@@ -326,7 +327,7 @@ class PeakDetectionDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Automatyczne wykrywanie pików")
+        self.setWindowTitle(tr("dlg_peakdet_title"))
         self._init_ui()
 
     def _init_ui(self):
@@ -336,19 +337,19 @@ class PeakDetectionDialog(QtWidgets.QDialog):
         self.min_height_spin.setRange(0.0, 10000.0)
         self.min_height_spin.setDecimals(3)
         self.min_height_spin.setValue(0.0)
-        layout.addRow("Minimalna wysokość piku:", self.min_height_spin)
+        layout.addRow(tr("lbl_min_height"), self.min_height_spin)
 
         self.min_distance_spin = QtWidgets.QSpinBox()
         self.min_distance_spin.setRange(1, 500)
         self.min_distance_spin.setValue(5)
-        self.min_distance_spin.setSuffix(" punktów danych")
-        layout.addRow("Minimalna odległość między pikami:", self.min_distance_spin)
+        self.min_distance_spin.setSuffix(tr("suffix_datapoints"))
+        layout.addRow(tr("lbl_min_distance"), self.min_distance_spin)
 
-        self.detect_ox_check = QtWidgets.QCheckBox("Zakres utlenienia")
+        self.detect_ox_check = QtWidgets.QCheckBox(tr("chk_detect_ox"))
         self.detect_ox_check.setChecked(True)
         layout.addRow(self.detect_ox_check)
 
-        self.detect_red_check = QtWidgets.QCheckBox("Zakres redukcji")
+        self.detect_red_check = QtWidgets.QCheckBox(tr("chk_detect_red"))
         self.detect_red_check.setChecked(True)
         layout.addRow(self.detect_red_check)
 
