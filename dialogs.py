@@ -646,3 +646,46 @@ class CurveFittingDialog(QtWidgets.QDialog):
             float(self._last_result['r_squared']),
             float(self._last_result['fwhm']),
         )
+
+
+class ScanRateDialog(QtWidgets.QDialog):
+    """Dialog do wprowadzenia szybkości skanowania v [mV/s] na potrzeby całkowania ładunku."""
+
+    scan_rate_confirmed = QtCore.pyqtSignal(float)
+
+    def __init__(self, initial_value=100.0, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Szybkość skanowania")
+        self._initial_value = initial_value
+        self._init_ui()
+
+    def _init_ui(self):
+        layout = QtWidgets.QFormLayout(self)
+
+        self.scan_rate_spin = QtWidgets.QDoubleSpinBox()
+        self.scan_rate_spin.setRange(0.001, 1000000.0)
+        self.scan_rate_spin.setDecimals(3)
+        self.scan_rate_spin.setValue(self._initial_value)
+        self.scan_rate_spin.setSuffix(" mV/s")
+        layout.addRow("Szybkość skanowania v:", self.scan_rate_spin)
+
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok |
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel,
+            parent=self
+        )
+        buttons.accepted.connect(self._on_accept)
+        buttons.rejected.connect(self.reject)
+        layout.addRow(buttons)
+
+    def _on_accept(self):
+        value = self.scan_rate_spin.value()
+        if value <= 0:
+            QtWidgets.QMessageBox.warning(
+                self, "Nieprawidłowa wartość",
+                "Szybkość skanowania musi być liczbą dodatnią (v > 0)."
+            )
+            self.reject()
+            return
+        self.scan_rate_confirmed.emit(value)
+        self.accept()

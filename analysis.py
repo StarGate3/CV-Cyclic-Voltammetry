@@ -171,6 +171,48 @@ def compute_peak_current_ratio(i_peak_oxidation, i_peak_reduction):
     return abs(i_peak_oxidation) / abs(i_peak_reduction)
 
 
+def compute_charge(x, y_raw, x_left, x_right, scan_rate_mv_s, baseline_x1=None, baseline_x2=None):
+    """
+    Integrate the charge Q [uC] under a peak between x_left and x_right on the raw current.
+
+    Integration always runs on y_raw (never the smoothed/calibrated curve) so that Q comes
+    out in real uC. x_left/x_right may be given in either order; they are sorted internally.
+
+    Baseline handling:
+      - If baseline_x1 and baseline_x2 are both given, the background is the straight line
+        through the *raw*-current values at those two x-positions — i.e. the user's existing
+        baseline endpoints, re-evaluated on the raw signal so units never mix with a
+        calibrated or smoothed curve.
+      - If either is None, the background falls back to the chord between the raw-current
+        values at x_left and x_right themselves.
+
+    Returns a dict {'charge_uC': ..., 'area_uA_mV': ...}, or None if the interval contains
+    fewer than 2 data points or scan_rate_mv_s is not strictly positive.
+    """
+    if scan_rate_mv_s <= 0:
+        return None
+    if x_left > x_right:
+        x_left, x_right = x_right, x_left
+
+    mask = (x >= x_left) & (x <= x_right)
+    x_region = x[mask]
+    y_region = y_raw[mask]
+    if len(x_region) < 2:
+        return None
+
+    if baseline_x1 is not None and baseline_x2 is not None:
+        bx1, bx2 = baseline_x1, baseline_x2
+    else:
+        bx1, bx2 = x_left, x_right
+    by1 = float(np.interp(bx1, x, y_raw))
+    by2 = float(np.interp(bx2, x, y_raw))
+    baseline_curve = compute_baseline_curve(x_region, bx1, by1, bx2, by2)
+
+    area = float(np.trapezoid(y_region - baseline_curve, x_region))
+    charge = area / scan_rate_mv_s
+    return {'charge_uC': charge, 'area_uA_mV': area}
+
+
 def compute_derivatives(x, y1, y2):
     """Return first numerical derivatives of y1 and y2 with respect to x."""
     return np.gradient(y1, x), np.gradient(y2, x)
