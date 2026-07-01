@@ -800,7 +800,7 @@ TRANSLATIONS = {
             Click "Compute peak parameters". The program will determine x_peak, y_peak, the baseline
             value, and the height/depth of the peak for each curve, and display the results on the plot
             and in the table. When BOTH peaks (oxidation and reduction) have been computed, the table
-            will additionally show: <b>E½</b> (half-wave potential), <b>ΔEp</b> (peak potential
+            will additionally show: <b>E½</b> (half-wave potential), <b>ΔEp</b> (peak-to-peak
             separation, |E<sub>p,a</sub> − E<sub>p,c</sub>| — a reversibility parameter)
             and <b>Ipa/Ipc</b> (the ratio of the anodic and cathodic peak currents — also a
             reversibility parameter).</p>
@@ -881,7 +881,7 @@ TRANSLATIONS = {
             (an asymmetry parameter); useful when the peak is clearly non-symmetric.<br/>
             • Choose the <b>curve</b> (oxidation/reduction) — the X range is automatically
             filled with the values of the current baseline; you can modify it.<br/>
-            • Click "Fit". Results: <b>FWHM</b> (full width at half maximum — the width of the peak
+            • Click "Fit". Results: <b>FWHM</b> (Full Width at Half Maximum — the width of the peak
             at half its height), <b>amplitude</b>, <b>peak center</b>,
             <b>R²</b> (goodness of fit; &gt; 0.99 is considered very good), and for the
             asymmetric model — <b>asymmetry</b> (σ_right/σ_left).<br/>
