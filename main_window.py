@@ -415,6 +415,8 @@ class MainWindow(QtWidgets.QMainWindow):
         The dialog (BaselineSettingsDialog) already recomputes y-values to match the
         new x positions before emitting this signal, so we trust the values as-is.
         """
+        self._reset_baseline_to_edit_mode('oxidation')
+        self._reset_baseline_to_edit_mode('reduction')
         self.baseline_settings = settings
         self.update_baseline_lines()
 
@@ -423,6 +425,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.x is None:
             QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw wczytaj plik danych.")
             return
+        self._reset_baseline_to_edit_mode('oxidation')
         self.baseline_mode = "oxidation"
         self.num_clicks = 0
         QtWidgets.QMessageBox.information(
@@ -435,6 +438,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.x is None:
             QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw wczytaj plik danych.")
             return
+        self._reset_baseline_to_edit_mode('reduction')
         self.baseline_mode = "reduction"
         self.num_clicks = 0
         QtWidgets.QMessageBox.information(
@@ -489,6 +493,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.baseline_region_oxidation = pg.LinearRegionItem(
                 values=[min(x1_ox, x2_ox), max(x1_ox, x2_ox)],
                 brush=(0, 0, 255, 50),
+                hoverBrush=pg.mkBrush(0, 0, 255, 20),
                 movable=True
             )
             self.baseline_region_oxidation.sigRegionChanged.connect(self.on_oxidation_region_changed)
@@ -512,6 +517,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.baseline_region_reduction = pg.LinearRegionItem(
                 values=[min(x1_red, x2_red), max(x1_red, x2_red)],
                 brush=(255, 0, 0, 50),
+                hoverBrush=pg.mkBrush(255, 0, 0, 20),
                 movable=True
             )
             self.baseline_region_reduction.sigRegionChanged.connect(self.on_reduction_region_changed)
@@ -534,6 +540,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Obsługuje zmianę regionu interaktywnego dla utlenienia."""
         if self.is_updating_baseline:
             return
+        self._reset_baseline_to_edit_mode('oxidation')
         x_min, x_max = self.baseline_region_oxidation.getRegion()
         # Snap y-values to the actual oxidation curve at the new boundary positions
         y1 = float(np.interp(x_min, self.x, self.y1))
@@ -545,12 +552,35 @@ class MainWindow(QtWidgets.QMainWindow):
         """Obsługuje zmianę regionu interaktywnego dla redukcji."""
         if self.is_updating_baseline:
             return
+        self._reset_baseline_to_edit_mode('reduction')
         x_min, x_max = self.baseline_region_reduction.getRegion()
         # Snap y-values to the actual reduction curve at the new boundary positions
         y1 = float(np.interp(x_min, self.x, self.y2))
         y2 = float(np.interp(x_max, self.x, self.y2))
         self.baseline_settings['reduction'] = {'x1': x_min, 'y1': y1, 'x2': x_max, 'y2': y2}
         self.update_baseline_lines()
+
+    def _reset_baseline_to_edit_mode(self, kind):
+        """
+        Restore the edit-phase look for one baseline ('oxidation' or 'reduction'): drop its
+        post-peak curve fill (if any) and make the LinearRegionItem's fill visible again,
+        without touching its draggable edges. Called whenever the user starts editing that
+        baseline again (drag, numeric dialog, or a fresh 2x-click pick) so a leftover fill
+        never keeps referring to a baseline that is no longer current.
+        """
+        if kind == 'oxidation':
+            fill_item, region, edit_brush = self.peak_curve_oxidation, self.baseline_region_oxidation, (0, 0, 255, 50)
+        else:
+            fill_item, region, edit_brush = self.peak_curve_reduction, self.baseline_region_reduction, (255, 0, 0, 50)
+
+        if fill_item is not None:
+            self.plot_widget.removeItem(fill_item)
+            if kind == 'oxidation':
+                self.peak_curve_oxidation = None
+            else:
+                self.peak_curve_reduction = None
+        if region is not None:
+            region.setBrush(pg.mkBrush(*edit_brush))
 
     def _compute_single_peak(self, y_data, baseline_settings, mode):
         """
@@ -559,17 +589,26 @@ class MainWindow(QtWidgets.QMainWindow):
         Returns the analysis result dict (with x_peak, y_peak, baseline_val, height/depth,
         x_region, peak_height_curve, summary), or None when no data falls in the region.
         The relevant PlotDataItem/TextItem references are stored as instance attributes.
+
+        On success, this also switches that baseline's LinearRegionItem into "post-peak"
+        display: its fill becomes transparent (the draggable edges are untouched) and a
+        FillBetweenItem shades the actual area between the curve and the baseline over the
+        region the height/depth was measured on.
         """
         if mode == 'oxidation':
             result = analysis.compute_oxidation_peak(self.x, y_data, baseline_settings)
-            label, text_color, line_color, curve_color = "Utlenienie", 'b', 'b', 'c'
-            h_key, ip_name, curve_name = 'height', "Ip,a", "Peak Height Ox"
+            label, text_color, line_color = "Utlenienie", 'b', 'b'
+            h_key, ip_name = 'height', "Ip,a"
             ip_y = lambda r: [r['baseline_val'], r['y_peak']]
+            fill_brush = (0, 0, 255, 60)
+            region = self.baseline_region_oxidation
         else:
             result = analysis.compute_reduction_peak(self.x, y_data, baseline_settings)
-            label, text_color, line_color, curve_color = "Redukcja", 'r', 'r', 'm'
-            h_key, ip_name, curve_name = 'depth', "Ip,c", "Peak Height Red"
+            label, text_color, line_color = "Redukcja", 'r', 'r'
+            h_key, ip_name = 'depth', "Ip,c"
             ip_y = lambda r: [r['y_peak'], r['baseline_val']]
+            fill_brush = (255, 0, 0, 60)
+            region = self.baseline_region_reduction
 
         if result is None:
             return None
@@ -584,20 +623,33 @@ class MainWindow(QtWidgets.QMainWindow):
             [result['x_peak'], result['x_peak']], ip_y(result),
             pen=pg.mkPen(color=line_color, width=2, style=QtCore.Qt.PenStyle.DashLine), name=ip_name
         )
-        peak_curve = self.plot_widget.plot(
-            result['x_region'], result['peak_height_curve'],
-            pen=pg.mkPen(color=curve_color, width=2), name=curve_name
-        )
+
+        # Shade the exact area height/depth was measured over (curve vs baseline), at the
+        # real y-coordinates. Replaces the old "Peak Height" line, which plotted the
+        # baseline-subtracted values (peak_height_curve) and so floated near y=0,
+        # disconnected from where the peak actually sits on the plot.
+        x1, y1_b = baseline_settings['x1'], baseline_settings['y1']
+        x2, y2_b = baseline_settings['x2'], baseline_settings['y2']
+        baseline_curve = analysis.compute_baseline_curve(result['x_region'], x1, y1_b, x2, y2_b)
+        y_curve_region = result['peak_height_curve'] + baseline_curve
+        curve_item = pg.PlotCurveItem(result['x_region'], y_curve_region)
+        baseline_item = pg.PlotCurveItem(result['x_region'], baseline_curve)
+        peak_fill = pg.FillBetweenItem(curve_item, baseline_item, brush=pg.mkBrush(*fill_brush))
+        self.plot_widget.addItem(peak_fill)
+
+        if region is not None:
+            region.setBrush(pg.mkBrush(0, 0, 0, 0))  # transparent: edges stay draggable
+
         self.insert_result_row(label, result['x_peak'], result['y_peak'], result['baseline_val'], h_or_d)
 
         if mode == 'oxidation':
             self.peak_text_oxidation = peak_text
             self.ip_a_line = ip_line
-            self.peak_curve_oxidation = peak_curve
+            self.peak_curve_oxidation = peak_fill
         else:
             self.peak_text_reduction = peak_text
             self.ip_c_line = ip_line
-            self.peak_curve_reduction = peak_curve
+            self.peak_curve_reduction = peak_fill
 
         return result
 
@@ -622,6 +674,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ip_c_line = None
         self.peak_curve_oxidation = None
         self.peak_curve_reduction = None
+        # Restore both regions to the visible edit-mode fill; _compute_single_peak makes a
+        # region transparent again only if it actually finds a peak on that side, so a side
+        # that fails this time doesn't stay stuck transparent with nothing drawn over it.
+        for region, edit_brush in (
+            (self.baseline_region_oxidation, (0, 0, 255, 50)),
+            (self.baseline_region_reduction, (255, 0, 0, 50)),
+        ):
+            if region is not None:
+                region.setBrush(pg.mkBrush(*edit_brush))
         # Clear all previous results before re-inserting.
         self.resultsTable.setRowCount(0)
 
