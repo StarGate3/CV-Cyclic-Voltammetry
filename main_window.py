@@ -931,18 +931,27 @@ class MainWindow(QtWidgets.QMainWindow):
             dialogu numerycznego przywraca tryb edycji (pas z wypełnieniem wraca).</p>
 
             <p><b>6. Pierwsza pochodna</b><br/>
-            • Kliknij „Oblicz pochodną".<br/>
-            • Pierwsza pochodna pomaga precyzyjnie zlokalizować ekstrema woltamogramu: miejsca,
-            w których pochodna przecina zero, odpowiadają wierzchołkom pików (utleniania
-            i redukcji).<br/>
-            • Podaj zakres poszukiwania miejsc zerowych i kliknij „Znajdź miejsca zerowe" –
-            punkty zostaną pokazane na wykresie i zapisane w tabeli.</p>
+            <i>Krok opcjonalny</i> — pomocniczy, służy do precyzyjnej lokalizacji ekstremów;
+            nie jest wymagany do podstawowej analizy piku.<br/>
+            • Kliknij „Oblicz pochodną" — otworzy się osobne okno z wykresem pierwszej
+            pochodnej.<br/>
+            • Okno ma własne kontrolki wygładzania (niezależne od ustawień w głównym oknie)
+            oraz pole „Zakres miejsc zerowych od/do" z przyciskiem „Znajdź miejsca zerowe".<br/>
+            • Miejsca zerowe pierwszej pochodnej odpowiadają ekstremom — wierzchołkom pików
+            utleniania i redukcji.<br/>
+            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
+            w głównym oknie.</p>
 
-            <p><b>7. Druga pochodna (procesy nieodwracalne)</b><br/>
-            • Kliknij „Oblicz drugą pochodną".<br/>
-            • Opcja wygładzania jest opcjonalna, ale zalecana.<br/>
-            • Podaj zakres poszukiwania miejsc zerowych.<br/>
-            • Kliknij „Znajdź miejsca zerowe" – punkty zostaną pokazane na wykresie i zapisane w tabeli.</p>
+            <p><b>7. Druga pochodna</b><br/>
+            <i>Krok opcjonalny</i> — szczególnie przydatny przy analizie procesów
+            nieodwracalnych, gdzie brak pary pików utrudnia zwykłe wyznaczanie parametrów.<br/>
+            • Kliknij „Oblicz drugą pochodną" — analogicznie jak przy pierwszej pochodnej,
+            otworzy się osobne okno z wykresem drugiej pochodnej, własnym wygładzaniem,
+            polem zakresu i przyciskiem „Znajdź miejsca zerowe".<br/>
+            • Miejsca zerowe drugiej pochodnej odpowiadają punktom przegięcia woltamogramu,
+            przydatnym zwłaszcza wtedy, gdy proces nieodwracalny nie tworzy wyraźnego piku.<br/>
+            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
+            w głównym oknie.</p>
 
             <p><b>8. Eksport do Excela</b><br/>
             Kliknij „Eksport do Excela", wybierz nazwę pliku.
