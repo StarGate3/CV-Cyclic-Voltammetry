@@ -990,54 +990,55 @@ TRANSLATIONS = {
         naturally under the peak before reading off the peak parameters.</p>
         """,
 
-        "theory_tab3_title_en": "Parametry piku",
+        "theory_tab3_title_en": "Peak parameters",
         "theory_tab3_html_en": """
-        <h3>Wysokość (H) i głębokość (D) piku</h3>
-        <p>Wysokość piku anodowego <b>H = i<sub>p,a</sub> − i<sub>baseline</sub>(E<sub>p,a</sub>)</b>
-        to odległość maksimum od linii bazowej w jego położeniu. Analogicznie
-        głębokość piku katodowego <b>D = i<sub>baseline</sub>(E<sub>p,c</sub>) − i<sub>p,c</sub></b>.
-        Obie wielkości są dodatnie i wyrażone w μA (lub — po kalibracji — w μA/cm²,
+        <h3>Peak height (H) and peak depth (D)</h3>
+        <p>The anodic peak height <b>H = i<sub>p,a</sub> − i<sub>baseline</sub>(E<sub>p,a</sub>)</b>
+        is the distance from the maximum to the baseline at its position. Similarly,
+        the cathodic peak depth <b>D = i<sub>baseline</sub>(E<sub>p,c</sub>) − i<sub>p,c</sub></b>.
+        Both quantities are positive and expressed in μA (or — after calibration — in μA/cm²,
         μA/mM, μA/(cm²·mM)).</p>
 
-        <h3>Stosunek prądów i<sub>p,a</sub> / i<sub>p,c</sub></h3>
-        <p>Stosunek wysokości piku anodowego do katodowego informuje o odwracalności
-        procesu elektrochemicznego:</p>
+        <h3>Peak current ratio i<sub>p,a</sub> / i<sub>p,c</sub></h3>
+        <p>The ratio of the anodic to cathodic peak height indicates the reversibility
+        of the electrochemical process:</p>
         <table border="1" cellpadding="6" cellspacing="0">
-            <tr><th>i<sub>p,a</sub> / i<sub>p,c</sub></th><th>Interpretacja</th></tr>
-            <tr><td>≈ 1,0</td><td>Proces odwracalny (forma utleniona i zredukowana stabilne)</td></tr>
-            <tr><td>&lt; 1 lub &gt; 1</td><td>Proces quasi-odwracalny lub sprzężona reakcja chemiczna</td></tr>
-            <tr><td>brak jednego z pików</td><td>Proces nieodwracalny</td></tr>
+            <tr><th>i<sub>p,a</sub> / i<sub>p,c</sub></th><th>Interpretation</th></tr>
+            <tr><td>≈ 1.0</td><td>Reversible process (oxidized and reduced forms stable)</td></tr>
+            <tr><td>&lt; 1 or &gt; 1</td><td>Quasi-reversible process or coupled chemical reaction</td></tr>
+            <tr><td>one of the peaks absent</td><td>Irreversible process</td></tr>
         </table>
 
-        <h3>Równanie Randlesa-Ševčíka</h3>
-        <p>Dla procesu odwracalnego, kontrolowanego dyfuzją, prąd piku wynosi:</p>
-        <p style="margin-left:2em;"><b>i<sub>p</sub> = 0,4463 · n · F · A · C · √(n · F · v · D / (R · T))</b></p>
-        <p>W 25 °C upraszcza się do i<sub>p</sub> = (2,69·10⁵) · n<sup>3/2</sup> · A · C · √(D · v).</p>
-        <p><b>Znaczenie symboli:</b></p>
+        <h3>The Randles–Ševčík equation</h3>
+        <p>For a reversible, diffusion-controlled process, the peak current is:</p>
+        <p style="margin-left:2em;"><b>i<sub>p</sub> = 0.4463 · n · F · A · C · √(n · F · v · D / (R · T))</b></p>
+        <p>At 25 °C this simplifies to i<sub>p</sub> = (2.69·10⁵) · n<sup>3/2</sup> · A · C · √(D · v).</p>
+        <p><b>Meaning of the symbols:</b></p>
         <ul>
-            <li><b>i<sub>p</sub></b> — prąd piku [A]</li>
-            <li><b>n</b> — liczba elektronów biorących udział w reakcji</li>
-            <li><b>F</b> — stała Faradaya (96 485 C/mol)</li>
-            <li><b>A</b> — powierzchnia elektrody [cm²]</li>
-            <li><b>C</b> — stężenie analitu w roztworze [mol/cm³]</li>
-            <li><b>v</b> — szybkość skanowania potencjału [V/s]</li>
-            <li><b>D</b> — współczynnik dyfuzji analitu [cm²/s]</li>
-            <li><b>R</b> — stała gazowa (8,314 J/(mol·K))</li>
-            <li><b>T</b> — temperatura [K]</li>
+            <li><b>i<sub>p</sub></b> — peak current [A]</li>
+            <li><b>n</b> — number of electrons involved in the reaction</li>
+            <li><b>F</b> — Faraday constant (96,485 C/mol)</li>
+            <li><b>A</b> — electrode area [cm²]</li>
+            <li><b>C</b> — analyte concentration in solution [mol/cm³]</li>
+            <li><b>v</b> — potential scan rate [V/s]</li>
+            <li><b>D</b> — analyte diffusion coefficient [cm²/s]</li>
+            <li><b>R</b> — gas constant (8.314 J/(mol·K))</li>
+            <li><b>T</b> — temperature [K]</li>
         </ul>
-        <p>Liniowa zależność i<sub>p</sub> od √v jest diagnostyką procesu
-        kontrolowanego dyfuzją.</p>
-        <p>Ponieważ prąd piku i<sub>p</sub> jest wprost proporcjonalny do stężenia analitu C
-        (zgodnie z równaniem Randlesa-Ševčíka), wysokość piku stanowi podstawę ilościowego
-        oznaczania stężenia metodą krzywej kalibracyjnej.</p>
+        <p>A linear relationship between i<sub>p</sub> and √v is diagnostic of a
+        diffusion-controlled process.</p>
+        <p>Because the peak current i<sub>p</sub> is directly proportional to the analyte
+        concentration C (per the Randles–Ševčík equation), peak height provides the basis
+        for quantitative concentration determination via a calibration curve.</p>
 
-        <h3>Automatyczne wykrywanie pików</h3>
-        <p>Program może automatycznie lokalizować piki metodą <b>find_peaks</b>, wykrywającą
-        lokalne maksima/minima spełniające kryteria minimalnej wysokości i minimalnej odległości
-        między pikami. Różni się to od ręcznego wyznaczania parametrów piku przez linię bazową:
-        automatyczna detekcja szybko wskazuje położenie pików, natomiast dokładne parametry
-        (wysokość względem tła, baseline) wyznacza się metodą linii bazowej. Kryteria minimalnej
-        wysokości i odległości służą do odfiltrowania szumu i nieistotnych lokalnych ekstremów.</p>
+        <h3>Automatic peak detection</h3>
+        <p>The program can automatically locate peaks using the <b>find_peaks</b> method,
+        which detects local maxima/minima meeting the minimum peak height and minimum
+        distance between peaks criteria. This differs from manually determining peak
+        parameters via the baseline: automatic detection quickly indicates peak positions,
+        whereas the exact parameters (height relative to the background, baseline) are
+        determined using the baseline method. The minimum height and distance criteria
+        are used to filter out noise and insignificant local extrema.</p>
         """,
 
         "theory_tab4_title_en": "Pochodne i miejsca zerowe",
