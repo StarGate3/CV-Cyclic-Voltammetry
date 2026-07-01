@@ -1,12 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_all
+
+scipy_datas, scipy_binaries, scipy_hiddenimports = collect_all('scipy')
+
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
-    hiddenimports=[],
+    binaries=scipy_binaries,
+    datas=scipy_datas,
+    hiddenimports=['xlsxwriter'] + scipy_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,5 +39,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['CV.ico'],
+    icon=['Ikona.ico'],
 )

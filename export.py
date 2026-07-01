@@ -36,6 +36,14 @@ def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
 
     df_params = pd.DataFrame(table_data) if table_data else pd.DataFrame()
 
+    try:
+        import xlsxwriter  # noqa: F401
+    except ImportError:
+        raise RuntimeError(
+            "Do eksportu do Excela wymagany jest pakiet 'xlsxwriter'. "
+            "Zainstaluj go poleceniem: python -m pip install xlsxwriter"
+        )
+
     writer = pd.ExcelWriter(filename, engine='xlsxwriter')
     df.to_excel(writer, sheet_name="Dane", index=False)
     df_params.to_excel(writer, sheet_name="Parametry", index=False)
