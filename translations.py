@@ -1080,101 +1080,104 @@ TRANSLATIONS = {
         </ul>
         """,
 
-        "theory_tab5_title_en": "Dopasowanie krzywych",
+        "theory_tab5_title_en": "Curve fitting",
         "theory_tab5_html_en": """
-        <h3>Kiedy stosować Gaussa, a kiedy Lorentza</h3>
+        <h3>When to use a Gaussian vs. a Lorentzian</h3>
         <table border="1" cellpadding="6" cellspacing="0">
-            <tr><th>Model</th><th>Kształt</th><th>Zastosowanie</th></tr>
-            <tr><td>Gaussowski</td>
-                <td>szybko opadające ogony (exp(−x²))</td>
-                <td>piki w miarę symetryczne, o wąskich ogonach</td></tr>
-            <tr><td>Lorentzowski</td>
-                <td>wolno opadające, szerokie ogony (1/(1+x²))</td>
-                <td>piki z szerszymi ogonami/skrzydłami</td></tr>
-            <tr><td>Asymetryczny Gaussowski</td>
-                <td>różne σ z dwóch stron centrum</td>
-                <td>piki wyraźnie niesymetryczne</td></tr>
+            <tr><th>Model</th><th>Shape</th><th>Application</th></tr>
+            <tr><td>Gaussian</td>
+                <td>fast-decaying tails (exp(−x²))</td>
+                <td>reasonably symmetric peaks, with narrow tails</td></tr>
+            <tr><td>Lorentzian</td>
+                <td>slowly decaying, broad tails (1/(1+x²))</td>
+                <td>peaks with wider tails/wings</td></tr>
+            <tr><td>Asymmetric Gaussian</td>
+                <td>different σ on each side of the center</td>
+                <td>clearly asymmetric peaks</td></tr>
         </table>
-        <p>Modele te są funkcjami dopasowania matematycznego do wyznaczenia parametrów piku
-        (FWHM, centrum, amplituda); wybór modelu to kwestia jakości dopasowania kształtu,
-        nie interpretacji mechanizmu elektrodowego.</p>
+        <p>These models are mathematical fitting functions used to determine peak
+        parameters (FWHM, center, amplitude); the choice of model is a matter of
+        shape-fitting quality, not interpretation of the electrode mechanism.</p>
 
-        <h3>FWHM — szerokość połówkowa</h3>
-        <p><b>FWHM</b> (Full Width at Half Maximum) to szerokość piku na wysokości
-        równej połowie jego amplitudy. Wzory modelowe:</p>
+        <h3>FWHM — full width at half maximum</h3>
+        <p><b>FWHM</b> (Full Width at Half Maximum) is the width of the peak at a
+        height equal to half its amplitude. Model formulas:</p>
         <ul>
-            <li>Gauss: <b>FWHM = 2·√(2·ln2)·σ ≈ 2,3548·σ</b></li>
-            <li>Lorentz: <b>FWHM = 2·γ</b></li>
-            <li>Asymetryczny Gauss: <b>FWHM = √(2·ln2)·(σ<sub>L</sub> + σ<sub>R</sub>)</b></li>
+            <li>Gaussian: <b>FWHM = 2·√(2·ln2)·σ ≈ 2.3548·σ</b></li>
+            <li>Lorentzian: <b>FWHM = 2·γ</b></li>
+            <li>Asymmetric Gaussian: <b>FWHM = √(2·ln2)·(σ<sub>L</sub> + σ<sub>R</sub>)</b></li>
         </ul>
-        <p>Dla procesu odwracalnego w 25 °C teoretyczna FWHM piku wynosi ≈ 90,6/n mV
-        (n — liczba elektronów). Znacznie szerszy pik świadczy o nieodwracalności lub
-        powolnym transporcie.</p>
+        <p>For a reversible process at 25 °C, the theoretical peak FWHM is ≈ 90.6/n mV
+        (n — number of electrons). A significantly wider peak indicates irreversibility
+        or slow transport.</p>
 
-        <h3>Asymetria piku</h3>
-        <p>Współczynnik <b>asymetrii = σ<sub>prawa</sub> / σ<sub>lewa</sub></b>:</p>
+        <h3>Peak asymmetry</h3>
+        <p>The <b>asymmetry = σ<sub>right</sub> / σ<sub>left</sub></b> coefficient:</p>
         <ul>
-            <li><b>≈ 1,0</b> — pik symetryczny.</li>
-            <li><b>&gt; 1</b> — prawa strona piku szersza.</li>
-            <li><b>&lt; 1</b> — lewa strona piku szersza.</li>
+            <li><b>≈ 1.0</b> — symmetric peak.</li>
+            <li><b>&gt; 1</b> — the right side of the peak is wider.</li>
+            <li><b>&lt; 1</b> — the left side of the peak is wider.</li>
         </ul>
-        <p>Kierunek i stopień asymetrii mogą sygnalizować odstępstwa od idealnego,
-        symetrycznego kształtu piku; ich interpretacja mechanistyczna wymaga jednak
-        dodatkowej wiedzy o układzie i nie wynika jednoznacznie z samego dopasowania.</p>
+        <p>The direction and degree of asymmetry may signal deviations from an
+        ideal, symmetric peak shape; however, their mechanistic interpretation
+        requires additional knowledge of the system and does not follow
+        unambiguously from the fit alone.</p>
 
-        <h3>Współczynnik determinacji R²</h3>
-        <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> mierzy jaki procent zmienności
-        danych wyjaśnia model:</p>
+        <h3>Coefficient of determination R²</h3>
+        <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> measures what percentage
+        of the data's variability the model explains:</p>
         <ul>
-            <li><b>R² &gt; 0,99</b> — dopasowanie bardzo dobre, model adekwatny.</li>
-            <li><b>0,95 – 0,99</b> — akceptowalne, ale warto sprawdzić inny model
-            lub zmniejszyć zakres dopasowania.</li>
-            <li><b>&lt; 0,95</b> — model niewłaściwy lub dane zaszumione; rozważ
-            wygładzanie lub model asymetryczny.</li>
+            <li><b>R² &gt; 0.99</b> — very good fit, model adequate.</li>
+            <li><b>0.95 – 0.99</b> — acceptable, but it is worth checking another
+            model or narrowing the fitting range.</li>
+            <li><b>&lt; 0.95</b> — model unsuitable or data noisy; consider
+            smoothing or the asymmetric model.</li>
         </ul>
         """,
 
-        "theory_tab6_title_en": "Kalibracja jednostek",
+        "theory_tab6_title_en": "Unit calibration",
         "theory_tab6_html_en": """
-        <h3>Normalizacja do powierzchni elektrody (standard publikacyjny)</h3>
-        <p>Prąd zarejestrowany na elektrodzie zależy liniowo od jej powierzchni
-        (patrz równanie Randlesa-Ševčíka). Porównywanie bezwzględnych wartości μA
-        z różnych elektrod jest bezsensowne. Dlatego w publikacjach elektrochemicznych
-        standardem jest <b>gęstość prądu j = i / A [μA/cm²]</b>.</p>
+        <h3>Normalization by electrode area (publication standard)</h3>
+        <p>The current recorded at an electrode depends linearly on its area
+        (see the Randles–Ševčík equation). Comparing absolute μA values from
+        different electrodes is meaningless. This is why, in electrochemical
+        publications, the standard is the <b>current density j = i / A [μA/cm²]</b>.</p>
 
-        <h3>Wyznaczanie rzeczywistej powierzchni elektrody (ECSA)</h3>
-        <p><b>ECSA</b> (Electrochemically Active Surface Area) to powierzchnia faktycznie
-        dostępna dla reakcji, zwykle większa niż powierzchnia geometryczna dla elektrod
-        nanostrukturalnych. Typowe metody:</p>
+        <h3>Determining the true electrode area (ECSA)</h3>
+        <p><b>ECSA</b> (Electrochemically Active Surface Area) is the surface actually
+        available for the reaction, typically larger than the geometric area for
+        nanostructured electrodes. Typical methods:</p>
         <ul>
-            <li><b>Metoda Randlesa-Ševčíka:</b> wyznacz i<sub>p</sub> dla kilku szybkości
-            skanowania z wzorcem o znanym D i C (np. [Fe(CN)<sub>6</sub>]³⁻/⁴⁻),
-            dopasuj i<sub>p</sub> vs √v i oblicz A z nachylenia.</li>
-            <li><b>Metoda pojemnościowa (double-layer):</b> z CV bez aktywnych par
-            redoks oblicz pojemność C<sub>dl</sub> i podziel przez specyficzną pojemność
-            materiału (zwykle 20–60 μF/cm² dla metali).</li>
-            <li><b>Metoda utleniania H<sub>upd</sub></b> (dla Pt) — z ładunku pików
-            desorpcji wodoru, 210 μC/cm² dla Pt(111).</li>
-            <li><b>Metoda wzorca redoks</b> — z CV [Ru(NH<sub>3</sub>)<sub>6</sub>]³⁺ lub
-            ferrocenu o znanym współczynniku dyfuzji.</li>
+            <li><b>Randles–Ševčík method:</b> determine i<sub>p</sub> at several scan
+            rates using a standard with known D and C (e.g., [Fe(CN)<sub>6</sub>]³⁻/⁴⁻),
+            fit i<sub>p</sub> vs √v, and calculate A from the slope.</li>
+            <li><b>Capacitive (double-layer) method:</b> from a CV without active
+            redox couples, calculate the double-layer capacitance C<sub>dl</sub> and
+            divide by the material's specific capacitance (typically 20–60 μF/cm²
+            for metals).</li>
+            <li><b>H<sub>upd</sub> oxidation method</b> (for Pt) — from the charge of
+            the hydrogen desorption peaks, 210 μC/cm² for Pt(111).</li>
+            <li><b>Redox probe method</b> — from CV of [Ru(NH<sub>3</sub>)<sub>6</sub>]³⁺
+            or ferrocene with a known diffusion coefficient.</li>
         </ul>
 
-        <h3>Normalizacja do stężenia — czujniki elektrochemiczne</h3>
-        <p>W analityce czujnikowej istotna jest <b>czułość na stężenie</b>, wyrażana
-        w μA/mM lub (po dodatkowej normalizacji) μA/(cm²·mM). Pozwala porównywać
-        różne konstrukcje czujników niezależnie od rozmiaru i stężenia kalibracyjnego.</p>
+        <h3>Normalization by concentration — electrochemical sensors</h3>
+        <p>In sensor analytics, what matters is <b>concentration sensitivity</b>,
+        expressed in μA/mM or (after additional normalization) μA/(cm²·mM). It allows
+        comparing different sensor designs independently of size and calibration
+        concentration.</p>
 
-        <h3>Przelicznik jednostek w CVision</h3>
+        <h3>Unit conversion in CVision</h3>
         <table border="1" cellpadding="6" cellspacing="0">
-            <tr><th>Sytuacja</th><th>Operacja</th><th>Jednostka wynikowa</th></tr>
-            <tr><td>Brak normalizacji</td><td>i</td><td>μA</td></tr>
-            <tr><td>Normalizuj względem A</td><td>i / A</td><td>μA/cm²</td></tr>
-            <tr><td>Normalizuj względem c</td><td>i / c</td><td>μA/mM</td></tr>
-            <tr><td>Obie normalizacje</td><td>i / (A · c)</td><td>μA/(cm²·mM)</td></tr>
+            <tr><th>Situation</th><th>Operation</th><th>Resulting unit</th></tr>
+            <tr><td>No normalization</td><td>i</td><td>μA</td></tr>
+            <tr><td>Normalize by A</td><td>i / A</td><td>μA/cm²</td></tr>
+            <tr><td>Normalize by c</td><td>i / c</td><td>μA/mM</td></tr>
+            <tr><td>Both normalizations</td><td>i / (A · c)</td><td>μA/(cm²·mM)</td></tr>
         </table>
-        <p><b>Przykład:</b> pik o wysokości 168,175 μA dla elektrody o A = 0,071 cm²
-        daje 168,175 / 0,071 ≈ <b>2368,66 μA/cm²</b>. Tę wartość można porównywać
-        z literaturą niezależnie od wielkości elektrody.</p>
+        <p><b>Example:</b> a peak with a height of 168.175 μA for an electrode with
+        A = 0.071 cm² gives 168.175 / 0.071 ≈ <b>2368.66 μA/cm²</b>. This value can
+        be compared with the literature independently of electrode size.</p>
         """,
     },
 }
