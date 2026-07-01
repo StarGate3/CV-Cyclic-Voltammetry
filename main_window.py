@@ -259,8 +259,17 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.smoothingCheckBox.isChecked():
             window_length = self.windowSpinBox.value()
             polyorder = self.polySpinBox.value()
-            self.y1 = analysis.apply_smoothing(self.raw_y1, window_length, polyorder)
-            self.y2 = analysis.apply_smoothing(self.raw_y2, window_length, polyorder)
+            try:
+                self.y1 = analysis.apply_smoothing(self.raw_y1, window_length, polyorder)
+                self.y2 = analysis.apply_smoothing(self.raw_y2, window_length, polyorder)
+            except Exception as e:
+                QtWidgets.QMessageBox.warning(
+                    self, "Błąd",
+                    f"Dane są zbyt krótkie do wygładzania z obecnymi ustawieniami "
+                    f"okna/stopnia wielomianu:\n{str(e)}"
+                )
+                self.y1 = self.raw_y1.copy()
+                self.y2 = self.raw_y2.copy()
         else:
             self.y1 = self.raw_y1.copy()
             self.y2 = self.raw_y2.copy()

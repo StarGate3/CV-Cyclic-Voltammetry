@@ -41,7 +41,11 @@ def apply_calibration(y, settings):
 
 
 def apply_smoothing(raw_y, window_length, polyorder):
-    """Apply Savitzky-Golay filter; auto-corrects window_length to satisfy scipy constraints."""
+    """Apply Savitzky-Golay filter; auto-corrects window_length to satisfy scipy constraints.
+
+    Raises ValueError with a Polish message if the data has too few points to
+    support any window_length that is both odd and greater than polyorder.
+    """
     if window_length % 2 == 0:
         window_length += 1
     if window_length > len(raw_y):
@@ -50,6 +54,11 @@ def apply_smoothing(raw_y, window_length, polyorder):
         window_length = polyorder + 1
         if window_length % 2 == 0:
             window_length += 1
+    if window_length > len(raw_y):
+        raise ValueError(
+            "Zbyt mało punktów danych, aby wygładzić serię przy obecnym stopniu "
+            "wielomianu. Zmniejsz stopień wielomianu lub wyłącz wygładzanie."
+        )
     return savgol_filter(raw_y, window_length, polyorder)
 
 
