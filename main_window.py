@@ -332,15 +332,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_file(self):
         """Otwiera okno wyboru pliku i importuje dane z wybranego pliku."""
         file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Wybierz plik z danymi", "", "Pliki tekstowe (*.txt);;Wszystkie pliki (*)"
+            self, self.tr_("filedlg_open_title"), "", self.tr_("filedlg_open_filter")
         )
         if file_name:
             try:
                 data = np.loadtxt(file_name)
                 if data.ndim != 2 or data.shape[1] < 3:
                     QtWidgets.QMessageBox.critical(
-                        self, "Błąd pliku",
-                        "Plik musi zawierać dokładnie 3 kolumny: E, I_ox, I_red."
+                        self, self.tr_("msg_file_error_title"),
+                        self.tr_("msg_bad_columns")
                     )
                     return
                 self.measurement_type = self.measurement_type_combo.currentIndex()
@@ -367,7 +367,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.baseline_settings['reduction']  = {'x1': mid_x,     'y1': new_y_min, 'x2': new_x_max, 'y2': new_y_min}
                 self.update_plot_from_raw_data()
             except Exception as e:
-                QtWidgets.QMessageBox.critical(self, "Błąd", f"Nie udało się zaimportować danych z pliku.\n{str(e)}")
+                QtWidgets.QMessageBox.critical(
+                    self, self.tr_("msg_error_title"),
+                    f"{self.tr_('msg_import_failed')}{str(e)}"
+                )
 
     def update_plot_from_raw_data(self):
         """Aktualizuje wykres główny na podstawie danych surowych i opcjonalnie stosuje wygładzanie."""
@@ -381,9 +384,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.y2 = analysis.apply_smoothing(self.raw_y2, window_length, polyorder)
             except Exception as e:
                 QtWidgets.QMessageBox.warning(
-                    self, "Błąd",
-                    f"Dane są zbyt krótkie do wygładzania z obecnymi ustawieniami "
-                    f"okna/stopnia wielomianu:\n{str(e)}"
+                    self, self.tr_("msg_error_title"),
+                    f"{self.tr_('msg_smoothing_failed')}{str(e)}"
                 )
                 self.y1 = self.raw_y1.copy()
                 self.y2 = self.raw_y2.copy()
@@ -493,8 +495,8 @@ class MainWindow(QtWidgets.QMainWindow):
             # until the user re-runs compute_peak_parameters against calibrated y.
             self.resultsTable.setRowCount(0)
             QtWidgets.QMessageBox.information(
-                self, "Kalibracja",
-                "Kalibracja została zastosowana. Kliknij 'Oblicz parametry piku' aby zaktualizować wyniki."
+                self, self.tr_("msg_calib_title"),
+                self.tr_("msg_calib_applied")
             )
         else:
             # No data loaded yet: still refresh status label and Y axis preview.
@@ -540,27 +542,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def pick_baseline_oxidation(self):
         """Aktywuje tryb wyboru zakresu dla utlenienia poprzez dwukrotne kliknięcie."""
         if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw wczytaj plik danych.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_load_file_first"))
             return
         self._reset_baseline_to_edit_mode('oxidation')
         self.baseline_mode = "oxidation"
         self.num_clicks = 0
         QtWidgets.QMessageBox.information(
-            self, "Zakres utlenienia",
-            "Kliknij dwa razy w obszar wykresu, aby wybrać punkty (x1,y1) oraz (x2,y2) dla utlenienia."
+            self, self.tr_("msg_pick_ox_title"),
+            self.tr_("msg_pick_ox_instr")
         )
 
     def pick_baseline_reduction(self):
         """Aktywuje tryb wyboru zakresu dla redukcji poprzez dwukrotne kliknięcie."""
         if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw wczytaj plik danych.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_load_file_first"))
             return
         self._reset_baseline_to_edit_mode('reduction')
         self.baseline_mode = "reduction"
         self.num_clicks = 0
         QtWidgets.QMessageBox.information(
-            self, "Zakres redukcji",
-            "Kliknij dwa razy w obszar wykresu, aby wybrać punkty (x1,y1) oraz (x2,y2) dla redukcji."
+            self, self.tr_("msg_pick_red_title"),
+            self.tr_("msg_pick_red_instr")
         )
 
     def on_mouse_click(self, event):
@@ -773,7 +775,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def compute_peak_parameters(self):
         """Oblicza parametry piku na podstawie danych i aktualnych ustawień linii bazowych."""
         if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_import_first"))
             return
         # Remove all previous peak annotations and the E½ line so a partial
         # re-computation cannot leave a stale line from the prior run (BUG-06).
@@ -831,7 +833,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_peak_detection_dialog(self):
         """Otwiera dialog automatycznego wykrywania pików."""
         if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_import_first"))
             return
         dialog = PeakDetectionDialog(self)
         dialog.detection_confirmed.connect(self._on_peak_detection_confirmed)
@@ -878,8 +880,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if total_found == 0:
             QtWidgets.QMessageBox.information(
-                self, "Brak pików",
-                "Nie wykryto żadnych pików przy podanych parametrach."
+                self, self.tr_("msg_no_peaks_title"),
+                self.tr_("msg_no_peaks_found")
             )
 
     def insert_result_row(self, peak_type, x_peak, y_peak, baseline, h_or_d):
@@ -895,7 +897,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def compute_derivative(self):
         """Oblicza pierwsze pochodne i otwiera okno analizy pochodnych."""
         if self.x is None or self.y1 is None or self.y2 is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_import_first"))
             return
         self.deriv_y1, self.deriv_y2 = analysis.compute_derivatives(self.x, self.y1, self.y2)
         derivative_window = DerivativeWindow(self.x, self.deriv_y1, self.deriv_y2, self)
@@ -909,7 +911,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def compute_second_derivative(self):
         """Oblicza drugie pochodne i otwiera okno analizy drugich pochodnych."""
         if self.x is None or self.y1 is None or self.y2 is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_import_first"))
             return
         self.second_deriv_y1, self.second_deriv_y2 = analysis.compute_second_derivatives(
             self.x, self.y1, self.y2
@@ -927,7 +929,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_curve_fitting_dialog(self):
         """Otwiera niemodalny dialog dopasowania krzywej (Gauss/Lorentz/asymetryczny)."""
         if self.x is None or self.y1 is None or self.y2 is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Najpierw zaimportuj dane.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_import_first"))
             return
         if self._curve_fit_dialog is not None:
             self._curve_fit_dialog.close()
@@ -948,10 +950,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def export_to_excel(self):
         """Eksportuje dane, parametry i wykres do pliku Excel."""
         if self.x is None:
-            QtWidgets.QMessageBox.warning(self, "Brak danych", "Brak danych do eksportu.")
+            QtWidgets.QMessageBox.warning(self, self.tr_("msg_no_data_title"), self.tr_("msg_no_export_data"))
             return
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Zapisz do Excela", "", "Excel Files (*.xlsx)"
+            self, self.tr_("filedlg_save_title"), "", self.tr_("filedlg_save_filter")
         )
         if not filename:
             return
@@ -986,7 +988,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 calibration_unit_label=self.current_unit_label,
             )
             QtWidgets.QMessageBox.information(
-                self, "Sukces", f"Dane oraz wykres zostały zapisane do pliku {filename}"
+                self, self.tr_("msg_success_title"), f"{self.tr_('msg_export_success')}{filename}"
             )
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Błąd", f"Wystąpił błąd podczas zapisu do pliku:\n{str(e)}")

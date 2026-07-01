@@ -117,7 +117,9 @@ class BaseDerivativeWindow(QtWidgets.QDialog):
                 smooth_y1 = savgol_filter(self.orig_y1, window_length, polyorder)
                 smooth_y2 = savgol_filter(self.orig_y2, window_length, polyorder)
             except Exception as e:
-                QtWidgets.QMessageBox.warning(self, "Błąd", f"Nie udało się wygładzić danych: {str(e)}")
+                QtWidgets.QMessageBox.warning(
+                    self, tr('msg_error_title'), f"{tr('msg_smoothing_error')}{str(e)}"
+                )
                 smooth_y1 = self.orig_y1
                 smooth_y2 = self.orig_y2
         else:
@@ -152,13 +154,13 @@ class BaseDerivativeWindow(QtWidgets.QDialog):
             self.plot_widget.addItem(self.intersectionPlot)
             lines = []
             for x, y in zeros1:
-                lines.append(f"[Utlenianie] x = {x:.3f}, y = {y:.3f}")
+                lines.append(f"[{tr('combo_oxidation')}] x = {x:.3f}, y = {y:.3f}")
             for x, y in zeros2:
-                lines.append(f"[Redukcja]  x = {x:.3f}, y = {y:.3f}")
-            msg = "Znalezione miejsca zerowe:\n" + "\n".join(lines)
-            QtWidgets.QMessageBox.information(self, "Miejsca zerowe", msg)
+                lines.append(f"[{tr('combo_reduction')}] x = {x:.3f}, y = {y:.3f}")
+            msg = tr('msg_zeros_found_header') + "\n".join(lines)
+            QtWidgets.QMessageBox.information(self, tr('msg_zeros_title'), msg)
         else:
-            QtWidgets.QMessageBox.information(self, "Miejsca zerowe", "Brak miejsc zerowych w zadanym zakresie.")
+            QtWidgets.QMessageBox.information(self, tr('msg_zeros_title'), tr('msg_zeros_none'))
 
     def mouseMoved(self, evt):
         """Aktualizuje etykietę z pozycją kursora podczas poruszania myszką."""

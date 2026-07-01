@@ -451,8 +451,8 @@ class CalibrationDialog(QtWidgets.QDialog):
         settings = self._build_settings()
         if settings.electrode_area == 0 or settings.concentration == 0:
             QtWidgets.QMessageBox.warning(
-                self, "Nieprawidłowe wartości",
-                "Powierzchnia elektrody oraz stężenie muszą być różne od zera."
+                self, tr('msg_invalid_values_title'),
+                tr('msg_calib_nonzero')
             )
             self.reject()
             return
@@ -572,8 +572,8 @@ class CurveFittingDialog(QtWidgets.QDialog):
         x_max = self.x_max_spin.value()
         if x_min >= x_max:
             QtWidgets.QMessageBox.warning(
-                self, "Nieprawidłowy zakres",
-                "Dolna granica zakresu X musi być mniejsza od górnej."
+                self, tr('msg_invalid_range_title'),
+                tr('msg_range_order')
             )
             return
 
@@ -582,8 +582,8 @@ class CurveFittingDialog(QtWidgets.QDialog):
         n_points = int(np.sum(mask))
         if n_points < 5:
             QtWidgets.QMessageBox.warning(
-                self, "Zbyt mało punktów",
-                f"Wybrany zakres zawiera tylko {n_points} punktów danych. Wymagane minimum: 5."
+                self, tr('msg_too_few_title'),
+                f"{tr('msg_too_few_points')}{n_points}{tr('msg_too_few_points_end')}"
             )
             return
 
@@ -595,8 +595,8 @@ class CurveFittingDialog(QtWidgets.QDialog):
             self.add_button.setEnabled(False)
             self._last_result = None
             QtWidgets.QMessageBox.warning(
-                self, "Dopasowanie nieudane",
-                f"Nie udało się dopasować modelu: {result['error']}"
+                self, tr('msg_fit_failed_title'),
+                f"{tr('msg_fit_failed')}{result['error']}"
             )
             return
 
