@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._e_half_value = None  # stores full-precision E½ for export (BUG-07)
         self.plot_widget = pg.PlotWidget(title="Woltamogram")
         self.plot_widget.addLegend()
-        self.apply_theme("Ciemny")
+        self.apply_theme(0)  # index 0 = dark theme; independent of combo_theme, created later
         self.is_updating_baseline = False
         self.baseline_mode = None
         self.num_clicks = 0
@@ -171,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtCore.Qt.AlignmentFlag.AlignCenter,
                 QtCore.Qt.ItemDataRole.TextAlignmentRole
             )
-        self.combo_theme.currentTextChanged.connect(self.apply_theme)
+        self.combo_theme.currentIndexChanged.connect(self.apply_theme)
         row.addWidget(self.combo_theme)
         row.addWidget(self.smoothingCheckBox)
         row.addWidget(QtWidgets.QLabel("Okno:"))
@@ -201,9 +201,13 @@ class MainWindow(QtWidgets.QMainWindow):
             mouse_point = self.plot_widget.getViewBox().mapSceneToView(pos)
             self.statusBar().showMessage(f"x = {mouse_point.x():.3f}, y = {mouse_point.y():.3f}")
 
-    def apply_theme(self, theme):
-        """Zmienia motyw aplikacji na ciemny lub jasny."""
-        if theme == "Ciemny":
+    def apply_theme(self, index):
+        """Zmienia motyw aplikacji na ciemny (indeks 0) lub jasny (indeks 1) w combo_theme.
+
+        Rozpoznawanie po indeksie (nie po widocznym tekście pozycji) — tekst pozycji combo
+        będzie w przyszłości tłumaczony, a indeks 0/1 pozostanie stały niezależnie od języka.
+        """
+        if index == 0:
             self.setStyleSheet("QWidget { background-color: #2e2e2e; color: white; }")
             self.plot_widget.setBackground('k')
             self.plot_widget.setStyleSheet("border: 1px solid white;")
