@@ -495,7 +495,8 @@ class CurveFittingDialog(QtWidgets.QDialog):
 
         form = QtWidgets.QFormLayout()
         self.model_combo = QtWidgets.QComboBox()
-        self.model_combo.addItems(list(_MODEL_LABEL_TO_KEY.keys()))
+        for label, model_key in _MODEL_LABEL_TO_KEY.items():
+            self.model_combo.addItem(label, model_key)
         form.addRow("Model:", self.model_combo)
 
         self.curve_combo = QtWidgets.QComboBox()
@@ -585,7 +586,7 @@ class CurveFittingDialog(QtWidgets.QDialog):
             )
             return
 
-        model_key = _MODEL_LABEL_TO_KEY[self.model_combo.currentText()]
+        model_key = self.model_combo.currentData()
         result = fit_peak(self._x, y, model=model_key, x_min=x_min, x_max=x_max)
 
         if result['error'] is not None:
