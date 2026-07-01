@@ -1,6 +1,6 @@
 # CVision
 
-![Version](https://img.shields.io/badge/version-3.1-blue)
+![Version](https://img.shields.io/badge/version-3.2-blue)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 
 Desktop application for **cyclic voltammetry (CV)** analysis — a Qt-based tool for importing voltammograms, selecting baselines, computing peak parameters, fitting peak shapes, calibrating currents to publication units, and exporting results to Excel.
