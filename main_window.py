@@ -15,6 +15,7 @@ from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
 from analysis import CalibrationSettings
 import export as _export_module
+from translations import TRANSLATIONS
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -23,7 +24,8 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CVision: Analiza woltamogramu cyklicznego")
+        self.current_language = "pl"  # set early so retranslate_ui() can use it right away
+        self.setWindowTitle(self.tr_("window_title"))
         self.E_half_line = None
         self._e_half_value = None  # stores full-precision E½ for export (BUG-07)
         self.plot_widget = pg.PlotWidget(title="Woltamogram")
@@ -100,9 +102,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar().addPermanentWidget(self.calibration_status_label)
         self.proxy = pg.SignalProxy(self.plot_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
         self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_click)
+        self.retranslate_ui()  # apply the starting language (pl) to all translated widgets
 
     def _build_toolbar_row1(self, row):
-        """Fills the first toolbar row: measurement type, file, baseline/axis settings, export, help."""
+        """Fills the first toolbar row: measurement type, file, baseline/axis settings, export."""
         self.measurement_type_combo = QtWidgets.QComboBox()
         self.measurement_type_combo.addItems(["Utlenianie", "Redukcja"])
         for i in range(self.measurement_type_combo.count()):
@@ -112,57 +115,58 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtCore.Qt.ItemDataRole.TextAlignmentRole
             )
         row.addWidget(self.measurement_type_combo)
-        btn_select_file = QtWidgets.QPushButton("Wybierz plik z danymi")
-        btn_select_file.clicked.connect(self.open_file)
-        row.addWidget(btn_select_file)
-        btn_baseline_settings = QtWidgets.QPushButton("Edytuj linię bazową (numerycznie)")
-        btn_baseline_settings.clicked.connect(self.edit_baseline_settings)
-        row.addWidget(btn_baseline_settings)
-        btn_clear = QtWidgets.QPushButton("Wyczyść wykres")
-        btn_clear.clicked.connect(self.clear_plot)
-        row.addWidget(btn_clear)
-        btn_axis_settings = QtWidgets.QPushButton("Edytuj ustawienia osi")
-        btn_axis_settings.clicked.connect(self.edit_axis_settings)
-        row.addWidget(btn_axis_settings)
-        btn_calibration = QtWidgets.QPushButton("Kalibracja jednostek")
-        btn_calibration.clicked.connect(self.edit_calibration_settings)
-        row.addWidget(btn_calibration)
-        btn_export = QtWidgets.QPushButton("Eksport do Excela")
-        btn_export.clicked.connect(self.export_to_excel)
-        row.addWidget(btn_export)
-        btn_help = QtWidgets.QPushButton("Help")
-        btn_help.clicked.connect(self.show_help)
-        row.addWidget(btn_help)
-        btn_theory = QtWidgets.QPushButton("Teoria")
-        btn_theory.clicked.connect(self.show_theory)
-        row.addWidget(btn_theory)
-        btn_about = QtWidgets.QPushButton("About")
-        btn_about.clicked.connect(self.show_about)
-        row.addWidget(btn_about)
+        self.btn_open_file = QtWidgets.QPushButton("Wybierz plik z danymi")
+        self.btn_open_file.clicked.connect(self.open_file)
+        row.addWidget(self.btn_open_file)
+        self.btn_baseline_edit = QtWidgets.QPushButton("Edytuj linię bazową (numerycznie)")
+        self.btn_baseline_edit.clicked.connect(self.edit_baseline_settings)
+        row.addWidget(self.btn_baseline_edit)
+        self.btn_clear = QtWidgets.QPushButton("Wyczyść wykres")
+        self.btn_clear.clicked.connect(self.clear_plot)
+        row.addWidget(self.btn_clear)
+        self.btn_axis_settings = QtWidgets.QPushButton("Edytuj ustawienia osi")
+        self.btn_axis_settings.clicked.connect(self.edit_axis_settings)
+        row.addWidget(self.btn_axis_settings)
+        self.btn_calibration = QtWidgets.QPushButton("Kalibracja jednostek")
+        self.btn_calibration.clicked.connect(self.edit_calibration_settings)
+        row.addWidget(self.btn_calibration)
+        self.btn_export = QtWidgets.QPushButton("Eksport do Excela")
+        self.btn_export.clicked.connect(self.export_to_excel)
+        row.addWidget(self.btn_export)
+        row.addStretch()
 
     def _build_toolbar_row2(self, row):
-        """Fills the second toolbar row: baseline pick, peak analysis, derivatives, theme, smoothing."""
-        btn_pick_ox = QtWidgets.QPushButton("Zakres utlenienia (2x klik)")
-        btn_pick_ox.clicked.connect(self.pick_baseline_oxidation)
-        row.addWidget(btn_pick_ox)
-        btn_pick_red = QtWidgets.QPushButton("Zakres redukcji (2x klik)")
-        btn_pick_red.clicked.connect(self.pick_baseline_reduction)
-        row.addWidget(btn_pick_red)
-        btn_compute_peak = QtWidgets.QPushButton("Oblicz parametry piku")
-        btn_compute_peak.clicked.connect(self.compute_peak_parameters)
-        row.addWidget(btn_compute_peak)
-        btn_auto_peaks = QtWidgets.QPushButton("Wykryj piki automatycznie")
-        btn_auto_peaks.clicked.connect(self.open_peak_detection_dialog)
-        row.addWidget(btn_auto_peaks)
-        btn_derivative = QtWidgets.QPushButton("Oblicz pochodną")
-        btn_derivative.clicked.connect(self.compute_derivative)
-        row.addWidget(btn_derivative)
-        btn_second_derivative = QtWidgets.QPushButton("Oblicz drugą pochodną")
-        btn_second_derivative.clicked.connect(self.compute_second_derivative)
-        row.addWidget(btn_second_derivative)
-        btn_curve_fit = QtWidgets.QPushButton("Dopasowanie krzywej")
-        btn_curve_fit.clicked.connect(self.open_curve_fitting_dialog)
-        row.addWidget(btn_curve_fit)
+        """Fills the second toolbar row: baseline pick, peak analysis, derivatives, curve fit."""
+        self.btn_pick_ox = QtWidgets.QPushButton("Zakres utlenienia (2x klik)")
+        self.btn_pick_ox.clicked.connect(self.pick_baseline_oxidation)
+        row.addWidget(self.btn_pick_ox)
+        self.btn_pick_red = QtWidgets.QPushButton("Zakres redukcji (2x klik)")
+        self.btn_pick_red.clicked.connect(self.pick_baseline_reduction)
+        row.addWidget(self.btn_pick_red)
+        self.btn_compute_peak = QtWidgets.QPushButton("Oblicz parametry piku")
+        self.btn_compute_peak.clicked.connect(self.compute_peak_parameters)
+        row.addWidget(self.btn_compute_peak)
+        self.btn_auto_peaks = QtWidgets.QPushButton("Wykryj piki automatycznie")
+        self.btn_auto_peaks.clicked.connect(self.open_peak_detection_dialog)
+        row.addWidget(self.btn_auto_peaks)
+        self.btn_derivative = QtWidgets.QPushButton("Oblicz pochodną")
+        self.btn_derivative.clicked.connect(self.compute_derivative)
+        row.addWidget(self.btn_derivative)
+        self.btn_second_deriv = QtWidgets.QPushButton("Oblicz drugą pochodną")
+        self.btn_second_deriv.clicked.connect(self.compute_second_derivative)
+        row.addWidget(self.btn_second_deriv)
+        self.btn_curve_fit = QtWidgets.QPushButton("Dopasowanie krzywej")
+        self.btn_curve_fit.clicked.connect(self.open_curve_fitting_dialog)
+        row.addWidget(self.btn_curve_fit)
+        row.addStretch()
+
+    def _build_toolbar_row3(self, row):
+        """Fills the third toolbar row: smoothing controls, theme, language, help/theory/about."""
+        row.addWidget(self.smoothingCheckBox)
+        row.addWidget(QtWidgets.QLabel("Okno:"))
+        row.addWidget(self.windowSpinBox)
+        row.addWidget(QtWidgets.QLabel("Stopień:"))
+        row.addWidget(self.polySpinBox)
         self.combo_theme = QtWidgets.QComboBox()
         self.combo_theme.addItems(["Ciemny", "Jasny"])
         for i in range(self.combo_theme.count()):
@@ -173,21 +177,39 @@ class MainWindow(QtWidgets.QMainWindow):
             )
         self.combo_theme.currentIndexChanged.connect(self.apply_theme)
         row.addWidget(self.combo_theme)
-        row.addWidget(self.smoothingCheckBox)
-        row.addWidget(QtWidgets.QLabel("Okno:"))
-        row.addWidget(self.windowSpinBox)
-        row.addWidget(QtWidgets.QLabel("Stopień:"))
-        row.addWidget(self.polySpinBox)
+        self.combo_language = QtWidgets.QComboBox()
+        self.combo_language.addItems(["Polski", "English"])
+        for i in range(self.combo_language.count()):
+            self.combo_language.setItemData(
+                i,
+                QtCore.Qt.AlignmentFlag.AlignCenter,
+                QtCore.Qt.ItemDataRole.TextAlignmentRole
+            )
+        self.combo_language.currentIndexChanged.connect(self.on_language_changed)
+        row.addWidget(self.combo_language)
+        self.btn_help = QtWidgets.QPushButton("Help")
+        self.btn_help.clicked.connect(self.show_help)
+        row.addWidget(self.btn_help)
+        self.btn_theory = QtWidgets.QPushButton("Teoria")
+        self.btn_theory.clicked.connect(self.show_theory)
+        row.addWidget(self.btn_theory)
+        self.btn_about = QtWidgets.QPushButton("About")
+        self.btn_about.clicked.connect(self.show_about)
+        row.addWidget(self.btn_about)
+        row.addStretch()
 
     def setup_layout(self):
         """Assembles the main window layout from toolbar rows and the plot widget."""
         top_row1 = QtWidgets.QHBoxLayout()
         top_row2 = QtWidgets.QHBoxLayout()
+        top_row3 = QtWidgets.QHBoxLayout()
         self._build_toolbar_row1(top_row1)
         self._build_toolbar_row2(top_row2)
+        self._build_toolbar_row3(top_row3)
         top_layout = QtWidgets.QVBoxLayout()
         top_layout.addLayout(top_row1)
         top_layout.addLayout(top_row2)
+        top_layout.addLayout(top_row3)
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         self.centralLayout = QtWidgets.QVBoxLayout(central_widget)
@@ -215,6 +237,68 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setStyleSheet("")
             self.plot_widget.setBackground('w')
             self.plot_widget.setStyleSheet("border: 1px solid black;")
+
+    def tr_(self, key):
+        """Zwraca tekst dla klucza w self.current_language; brakujący klucz -> sam klucz."""
+        return TRANSLATIONS[self.current_language].get(key, key)
+
+    def on_language_changed(self, index):
+        """Przełącza język UI na podstawie indeksu combo_language (0=pl, 1=en), nie tekstu.
+
+        Wzorowane na measurement_type_combo (odczyt currentIndex), a nie na dawnym sposobie
+        działania apply_theme (który porównywał widoczny tekst pozycji).
+        """
+        self.current_language = "pl" if index == 0 else "en"
+        self.retranslate_ui()
+
+    def _set_combo_item_texts(self, combo, texts):
+        """Podmienia tekst pozycji combo bez zmiany currentIndex i bez efektów ubocznych.
+
+        setItemText nie emituje currentIndexChanged w PyQt6 (zweryfikowane), ale sygnały są
+        blokowane na czas podmiany jako dodatkowe zabezpieczenie przed skutkami ubocznymi
+        (np. przypadkowym przełączeniem motywu przez apply_theme).
+        """
+        combo.blockSignals(True)
+        for i, text in enumerate(texts):
+            combo.setItemText(i, text)
+        combo.blockSignals(False)
+
+    def retranslate_ui(self):
+        """Ustawia teksty wszystkich widżetów przetłumaczonych w Etapie 0, wg self.current_language.
+
+        Etap 0: tytuł okna, 16 przycisków toolbara (rzędy 1-3), checkbox wygładzania,
+        pozycje obu combo (pomiar, motyw). Reszta interfejsu (etykiety Okno/Stopień,
+        nagłówki tabeli, osie, dialogi, treść Help/Teoria/About) zostaje nieprzetłumaczona
+        do kolejnych etapów.
+        """
+        self.setWindowTitle(self.tr_("window_title"))
+
+        self.btn_open_file.setText(self.tr_("btn_open_file"))
+        self.btn_baseline_edit.setText(self.tr_("btn_baseline_edit"))
+        self.btn_clear.setText(self.tr_("btn_clear"))
+        self.btn_axis_settings.setText(self.tr_("btn_axis_settings"))
+        self.btn_calibration.setText(self.tr_("btn_calibration"))
+        self.btn_export.setText(self.tr_("btn_export"))
+
+        self.btn_pick_ox.setText(self.tr_("btn_pick_ox"))
+        self.btn_pick_red.setText(self.tr_("btn_pick_red"))
+        self.btn_compute_peak.setText(self.tr_("btn_compute_peak"))
+        self.btn_auto_peaks.setText(self.tr_("btn_auto_peaks"))
+        self.btn_derivative.setText(self.tr_("btn_derivative"))
+        self.btn_second_deriv.setText(self.tr_("btn_second_deriv"))
+        self.btn_curve_fit.setText(self.tr_("btn_curve_fit"))
+
+        self.smoothingCheckBox.setText(self.tr_("check_smoothing"))
+        self.btn_help.setText(self.tr_("btn_help"))
+        self.btn_theory.setText(self.tr_("btn_theory"))
+        self.btn_about.setText(self.tr_("btn_about"))
+
+        self._set_combo_item_texts(
+            self.measurement_type_combo, [self.tr_("combo_oxidation"), self.tr_("combo_reduction")]
+        )
+        self._set_combo_item_texts(
+            self.combo_theme, [self.tr_("combo_theme_dark"), self.tr_("combo_theme_light")]
+        )
 
     def open_file(self):
         """Otwiera okno wyboru pliku i importuje dane z wybranego pliku."""
