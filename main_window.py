@@ -15,6 +15,7 @@ from derivative_windows import DerivativeWindow, SecondDerivativeWindow
 import analysis
 from analysis import CalibrationSettings
 import export as _export_module
+from export import MissingXlsxwriterError
 from translations import translate, set_language
 
 
@@ -807,8 +808,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ox_result = self._compute_single_peak(self.y1, self.baseline_settings['oxidation'], 'oxidation')
         red_result = self._compute_single_peak(self.y2, self.baseline_settings['reduction'], 'reduction')
-        results = (ox_result['summary'] if ox_result else "Utlenienie: brak danych w zadanym zakresie.\n\n")
-        results += (red_result['summary'] if red_result else "Redukcja: brak danych w zadanym zakresie.\n")
 
         if ox_result and red_result:
             E_half = analysis.compute_e_half(ox_result['x_peak'], red_result['x_peak'])
@@ -819,16 +818,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 pen=pg.mkPen(color='g', width=2, style=QtCore.Qt.PenStyle.DashLine)
             )
             self.plot_widget.addItem(self.E_half_line)
-            results += f"E1/2: {E_half:.3f}\n"
 
             delta_ep = analysis.compute_delta_ep(ox_result['x_peak'], red_result['x_peak'])
             peak_ratio = analysis.compute_peak_current_ratio(ox_result['height'], red_result['depth'])
             self.insert_result_row("ΔEp [mV]", delta_ep, "", "", "")
             self.insert_result_row("Ipa/Ipc", peak_ratio, "", "", "")
-            results += f"ΔEp: {delta_ep:.3f}\n"
-            results += f"Ipa/Ipc: {peak_ratio:.3f}\n" if peak_ratio is not None else "Ipa/Ipc: —\n"
 
-        QtWidgets.QMessageBox.information(self, "Parametry piku", results)
+        if ox_result or red_result:
+            self.statusBar().showMessage(self.tr_("status_peak_computed"), 5000)
 
     def open_peak_detection_dialog(self):
         """Otwiera dialog automatycznego wykrywania pików."""
@@ -990,8 +987,14 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(
                 self, self.tr_("msg_success_title"), f"{self.tr_('msg_export_success')}{filename}"
             )
+        except MissingXlsxwriterError:
+            QtWidgets.QMessageBox.critical(
+                self, self.tr_("msg_error_title"), self.tr_("msg_missing_xlsxwriter")
+            )
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Błąd", f"Wystąpił błąd podczas zapisu do pliku:\n{str(e)}")
+            QtWidgets.QMessageBox.critical(
+                self, self.tr_("msg_error_title"), f"{self.tr_('msg_export_error')}{str(e)}"
+            )
 
     def show_help(self):
         help_text = """

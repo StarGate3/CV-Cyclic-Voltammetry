@@ -4,6 +4,11 @@ import numpy as np
 import pandas as pd
 
 
+class MissingXlsxwriterError(RuntimeError):
+    """Raised when the optional 'xlsxwriter' package is not installed."""
+    pass
+
+
 def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
                     deriv_y1, deriv_y2, second_deriv_y1, second_deriv_y2,
                     table_data, deriv_intersections, second_deriv_intersections,
@@ -39,10 +44,7 @@ def export_to_excel(filename, x, raw_y1, raw_y2, y1, y2, smoothing_active,
     try:
         import xlsxwriter  # noqa: F401
     except ImportError:
-        raise RuntimeError(
-            "Do eksportu do Excela wymagany jest pakiet 'xlsxwriter'. "
-            "Zainstaluj go poleceniem: python -m pip install xlsxwriter"
-        )
+        raise MissingXlsxwriterError()
 
     with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name="Dane", index=False)

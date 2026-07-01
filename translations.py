@@ -149,6 +149,10 @@ TRANSLATIONS = {
         "filedlg_save_filter": "Excel Files (*.xlsx)",
         "msg_success_title": "Sukces",
         "msg_export_success": "Dane oraz wykres zostały zapisane do pliku ",
+        "msg_missing_xlsxwriter": "Brak wymaganego pakietu 'xlsxwriter'. Zainstaluj go, aby eksportować do Excela.",
+        "msg_export_error": "Wystąpił błąd podczas zapisu do pliku:\n",
+
+        "status_peak_computed": "Policzono parametry piku",
 
         "msg_invalid_values_title": "Nieprawidłowe wartości",
         "msg_calib_nonzero": "Powierzchnia elektrody oraz stężenie muszą być różne od zera.",
@@ -296,6 +300,10 @@ TRANSLATIONS = {
         "filedlg_save_filter": "Excel Files (*.xlsx)",
         "msg_success_title": "Success",
         "msg_export_success": "Data and plot saved to file ",
+        "msg_missing_xlsxwriter": "Required package 'xlsxwriter' is missing. Install it to export to Excel.",
+        "msg_export_error": "An error occurred while saving the file:\n",
+
+        "status_peak_computed": "Peak parameters computed",
 
         "msg_invalid_values_title": "Invalid values",
         "msg_calib_nonzero": "Electrode area and concentration must be non-zero.",
