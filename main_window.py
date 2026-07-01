@@ -641,6 +641,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.plot_widget.addItem(self.E_half_line)
             results += f"E1/2: {E_half:.3f}\n"
 
+            delta_ep = analysis.compute_delta_ep(ox_result['x_peak'], red_result['x_peak'])
+            peak_ratio = analysis.compute_peak_current_ratio(ox_result['height'], red_result['depth'])
+            self.insert_result_row("ΔEp [mV]", delta_ep, "", "", "")
+            self.insert_result_row("Ipa/Ipc", peak_ratio, "", "", "")
+            results += f"ΔEp: {delta_ep:.3f}\n"
+            results += f"Ipa/Ipc: {peak_ratio:.3f}\n" if peak_ratio is not None else "Ipa/Ipc: —\n"
+
         QtWidgets.QMessageBox.information(self, "Parametry piku", results)
 
     def open_peak_detection_dialog(self):

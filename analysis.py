@@ -151,6 +151,26 @@ def compute_e_half(x_ox_peak, x_red_peak):
     return (x_ox_peak + x_red_peak) / 2.0
 
 
+def compute_delta_ep(e_peak_oxidation, e_peak_reduction):
+    """Return the peak-to-peak separation ΔEp = |Eox - Ered|, a reversibility diagnostic."""
+    return abs(e_peak_oxidation - e_peak_reduction)
+
+
+def compute_peak_current_ratio(i_peak_oxidation, i_peak_reduction):
+    """
+    Return the peak-current ratio Ipa/Ipc, a reversibility diagnostic (~1 for a reversible couple).
+
+    i_peak_oxidation and i_peak_reduction are expected to be the 'height'/'depth'
+    values from compute_oxidation_peak/compute_reduction_peak, which are already
+    stored as positive magnitudes relative to the local baseline; absolute values
+    are applied here defensively for the same reason. Returns None if
+    i_peak_reduction is zero, since the ratio would otherwise be undefined.
+    """
+    if i_peak_reduction == 0:
+        return None
+    return abs(i_peak_oxidation) / abs(i_peak_reduction)
+
+
 def compute_derivatives(x, y1, y2):
     """Return first numerical derivatives of y1 and y2 with respect to x."""
     return np.gradient(y1, x), np.gradient(y2, x)
