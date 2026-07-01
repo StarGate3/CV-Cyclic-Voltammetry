@@ -1306,15 +1306,17 @@ class MainWindow(QtWidgets.QMainWindow):
             <tr><th>Model</th><th>Kształt</th><th>Zastosowanie</th></tr>
             <tr><td>Gaussowski</td>
                 <td>szybko opadające ogony (exp(−x²))</td>
-                <td>piki symetryczne, kontrolowane dyfuzją, niski szum</td></tr>
+                <td>piki w miarę symetryczne, o wąskich ogonach</td></tr>
             <tr><td>Lorentzowski</td>
                 <td>wolno opadające, szerokie ogony (1/(1+x²))</td>
-                <td>procesy z szybką kinetyką, poszerzenie jednorodne</td></tr>
+                <td>piki z szerszymi ogonami/skrzydłami</td></tr>
             <tr><td>Asymetryczny Gaussowski</td>
                 <td>różne σ z dwóch stron centrum</td>
-                <td>piki zniekształcone przez sprzężone reakcje chemiczne
-                    lub adsorpcję</td></tr>
+                <td>piki wyraźnie niesymetryczne</td></tr>
         </table>
+        <p>Modele te są funkcjami dopasowania matematycznego do wyznaczenia parametrów piku
+        (FWHM, centrum, amplituda); wybór modelu to kwestia jakości dopasowania kształtu,
+        nie interpretacji mechanizmu elektrodowego.</p>
 
         <h3>FWHM — szerokość połówkowa</h3>
         <p><b>FWHM</b> (Full Width at Half Maximum) to szerokość piku na wysokości
@@ -1331,11 +1333,13 @@ class MainWindow(QtWidgets.QMainWindow):
         <h3>Asymetria piku</h3>
         <p>Współczynnik <b>asymetrii = σ<sub>prawa</sub> / σ<sub>lewa</sub></b>:</p>
         <ul>
-            <li><b>≈ 1,0</b> — pik symetryczny (czysty proces dyfuzyjny).</li>
-            <li><b>&gt; 1</b> — prawa strona szersza (np. sprzężona reakcja chemiczna
-            po etapie elektronowym, mechanizm EC).</li>
-            <li><b>&lt; 1</b> — lewa strona szersza (np. adsorpcja formy utlenionej).</li>
+            <li><b>≈ 1,0</b> — pik symetryczny.</li>
+            <li><b>&gt; 1</b> — prawa strona piku szersza.</li>
+            <li><b>&lt; 1</b> — lewa strona piku szersza.</li>
         </ul>
+        <p>Kierunek i stopień asymetrii mogą sygnalizować odstępstwa od idealnego,
+        symetrycznego kształtu piku; ich interpretacja mechanistyczna wymaga jednak
+        dodatkowej wiedzy o układzie i nie wynika jednoznacznie z samego dopasowania.</p>
 
         <h3>Współczynnik determinacji R²</h3>
         <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> mierzy jaki procent zmienności
