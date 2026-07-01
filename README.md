@@ -1,11 +1,9 @@
 # CVision
 
-![Version](https://img.shields.io/badge/version-3.0-blue)
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Version](https://img.shields.io/badge/version-3.1-blue)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 
 Desktop application for **cyclic voltammetry (CV)** analysis — a Qt-based tool for importing voltammograms, selecting baselines, computing peak parameters, fitting peak shapes, calibrating currents to publication units, and exporting results to Excel.
-
-![Screenshot](screenshot.png)
 
 ---
 
@@ -29,7 +27,7 @@ Desktop application for **cyclic voltammetry (CV)** analysis — a Qt-based tool
 
 ## Installation
 
-**Requirements:** Python 3.8+
+**Requirements:** Python 3.11+
 
 ```bash
 # 1. Clone the repository
@@ -105,5 +103,5 @@ For background theory on any of the above, open the **"Teoria"** dialog from the
 
 ## Author and License
 
-- **Author:** [Author Name]
-- **License:** [License]
+- **Author:** StarGate3
+- **License:** MIT — see the LICENSE file

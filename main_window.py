@@ -916,7 +916,7 @@ class MainWindow(QtWidgets.QMainWindow):
         <body>
             <h4 align="center">CVision</h4>
             <h4>Analiza woltamogramu cyklicznego</h4>
-            <p>Wersja: 3.0</p>
+            <p>Wersja: 3.1</p>
             <p><b>Nowości w wersji 3.0:</b></p>
             <ul>
                 <li>Automatyczne wykrywanie pików (scipy.signal.find_peaks)</li>
