@@ -168,6 +168,150 @@ TRANSLATIONS = {
         "msg_zeros_title": "Miejsca zerowe",
         "msg_zeros_found_header": "Znalezione miejsca zerowe:\n",
         "msg_zeros_none": "Brak miejsc zerowych w zadanym zakresie.",
+
+        "dlg_help_title": "Help – instrukcja",
+        "help_html_pl": """
+        <html>
+        <body style="font-family:Arial; font-size:10pt;">
+            <p><b>1. Wybór typu pomiaru</b><br/>
+            Z rozwijanego menu wybierz "Utlenianie" lub "Redukcja".</p>
+
+            <p><b>2. Wczytanie danych</b><br/>
+            Kliknij przycisk „Wybierz plik z danymi" i załaduj plik tekstowy (*.txt)
+            zawierający trzy kolumny: E [mV], I_utlenianie [μA], I_redukcja [μA].</p>
+
+            <p><b>3. Wygładzenie</b><br/>
+            •! <i>W tym miejscu ustawienie wygładzania jest opcjonalne i zależy od jakości danych.</i><br/>
+            • Zaznacz „Wygładzanie (Savitzky-Golay)".<br/>
+            • <b>Okno</b>: liczba punktów uśrednianych przy wygładzaniu (musi być nieparzysta).
+            <b>Stopień</b>: rząd wielomianu dopasowywanego lokalnie w oknie (typowo 2–3;
+            musi być mniejszy niż okno).<br/>
+            <i>Uwaga:</i> niezalecane jest zwiększanie okna powyżej 15.</p>
+
+            <p><b>4. Wybór linii bazowej</b><br/>
+            Linię bazową można ustawić lub skorygować na trzy sposoby:</p>
+            <p>• <b>Dwukrotne kliknięcie:</b> <b>Utlenianie</b>: Kliknij „Zakres utlenienia
+            (2× klik)" i wskaż dwa punkty. <b>Redukcja</b>: Kliknij „Zakres redukcji (2× klik)"
+            i wskaż dwa punkty.
+
+            <b>Oba punkty</b> umieść na <b>liniowym fragmencie woltamogramu PRZED narastaniem piku</b>
+            (po lewej stronie piku) — tam, gdzie prąd zmienia się liniowo i nie ma jeszcze aktywności redoks.
+            Prosta łącząca te punkty reprezentuje prąd tła (niefaradajowski) i zostanie
+            <b>ekstrapolowana</b> pod pik, aby oszacować linię bazową w położeniu maksimum.
+            Nie umieszczaj punktów po obu stronach piku — linia przecinałaby wtedy pik zamiast
+            stanowić jego tło, co zafałszuje wysokość H.</p>
+            <p>• <b>Przeciąganie myszą:</b> kolorowy pas bazy można chwycić klikając na jego pole
+            i przesunąć go w całości, a następnie dostroić zakres precyzyjnie, przeciągając
+            pionowe krawędzie (linie brzegowe) pasa.</p>
+            <p>• <b>Dialog numeryczny „Edytuj linię bazową (numerycznie)":</b> pozwala wpisać
+            wartości potencjału dla krawędzi zakresu. W praktyce: dla utleniania ustawia się
+            prawą i lewą krawędź tak, aby zakres sięgał POZA maksimum piku; dla redukcji
+            analogicznie (kluczowe jest, aby zakres bazy znalazł się poza maksimum piku).
+            Wartości dobiera się orientacyjnie ("na oko"), pilnując, by baza obejmowała obszar
+            poza pikiem.</p>
+
+            <p><b>5. Obliczenie parametrów piku</b><br/>
+            Kliknij „Oblicz parametry piku". Program wyznaczy x_peak, y_peak, linię bazową
+            oraz wysokość/głębokość piku dla każdej z krzywych, a wyniki wyświetli na wykresie
+            i w tabeli. Gdy policzone zostaną OBA piki (utlenianie i redukcja), w tabeli
+            dodatkowo pojawią się: <b>E½</b> (potencjał półfalowy), <b>ΔEp</b> (rozdzielenie
+            potencjałów pików, |E<sub>p,a</sub> − E<sub>p,c</sub>| — parametr odwracalności)
+            oraz <b>Ipa/Ipc</b> (stosunek prądów pików anodowego i katodowego — również
+            parametr odwracalności).</p>
+            <p><i>Wizualizacja bazy po obliczeniu:</i> po kliknięciu tego przycisku kolorowy
+            pas linii bazowej traci wypełnienie (krawędzie pozostają widoczne i przeciągalne),
+            a w jego miejsce pojawia się wypełnienie obszaru między krzywą a linią bazową
+            (pod krzywą utleniania / nad krzywą redukcji) — co czytelnie pokazuje wysokość
+            piku. Przeciągnięcie krawędzi bazy, ponowny wybór zakresu (2× klik) lub użycie
+            dialogu numerycznego przywraca tryb edycji (pas z wypełnieniem wraca).</p>
+
+            <p><b>6. Pierwsza pochodna</b><br/>
+            <i>Krok opcjonalny</i> — pomocniczy, służy do precyzyjnej lokalizacji ekstremów;
+            nie jest wymagany do podstawowej analizy piku.<br/>
+            • Kliknij „Oblicz pochodną" — otworzy się osobne okno z wykresem pierwszej
+            pochodnej.<br/>
+            • Okno ma własne kontrolki wygładzania (niezależne od ustawień w głównym oknie)
+            oraz pole „Zakres miejsc zerowych od/do" z przyciskiem „Znajdź miejsca zerowe".<br/>
+            • Miejsca zerowe pierwszej pochodnej odpowiadają ekstremom — wierzchołkom pików
+            utleniania i redukcji.<br/>
+            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
+            w głównym oknie.</p>
+
+            <p><b>7. Druga pochodna</b><br/>
+            <i>Krok opcjonalny</i> — szczególnie przydatny przy analizie procesów
+            nieodwracalnych, gdzie brak pary pików utrudnia zwykłe wyznaczanie parametrów.<br/>
+            • Kliknij „Oblicz drugą pochodną" — analogicznie jak przy pierwszej pochodnej,
+            otworzy się osobne okno z wykresem drugiej pochodnej, własnym wygładzaniem,
+            polem zakresu i przyciskiem „Znajdź miejsca zerowe".<br/>
+            • Miejsca zerowe drugiej pochodnej odpowiadają punktom przegięcia woltamogramu,
+            przydatnym zwłaszcza wtedy, gdy proces nieodwracalny nie tworzy wyraźnego piku.<br/>
+            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
+            w głównym oknie.</p>
+
+            <p><b>8. Eksport do Excela</b><br/>
+            Kliknij „Eksport do Excela", wybierz nazwę pliku.
+            Zapisane zostaną: surowe dane, dane wygładzone, pochodne, miejsca zerowe, wyniki piku i wykres.</p>
+
+            <hr/>
+
+            <p><b>9. Automatyczne wykrywanie pików</b><br/>
+            • Kliknij „Wykryj piki automatycznie".<br/>
+            • <b>Minimalna wysokość piku</b>: filtruje szum — tylko piki o amplitudzie
+            większej lub równej tej wartości zostaną uznane za pik. Ustaw 0, aby wyłączyć filtr.<br/>
+            • <b>Minimalna odległość między pikami</b>: podawana w <i>punktach danych</i>
+            (nie w jednostkach osi X). Zapobiega wykrywaniu kilku pików w obrębie jednego
+            szerokiego maksimum.<br/>
+            • Zaznacz zakres(y) — utlenienia i/lub redukcji — dla których ma być uruchomione wyszukiwanie.<br/>
+            • Wykryte piki są nanoszone na wykres jako <b>żółte kółka</b> oraz
+            dopisywane do tabeli wyników jako „Pik auto (utl)" / „Pik auto (red)".</p>
+
+            <p><b>10. Kalibracja jednostek</b><br/>
+            • Kliknij „Kalibracja jednostek".<br/>
+            • Podaj <b>powierzchnię elektrody</b> [cm²] oraz/lub <b>stężenie analitu</b> [mM].<br/>
+            • Zaznacz odpowiednie checkboxy, aby znormalizować prąd.
+            Normalizacja względem powierzchni (μA/cm²) jest standardem publikacyjnym
+            i pozwala porównywać pomiary z elektrod o różnych rozmiarach. Normalizacja
+            względem stężenia (μA/mM) stosowana jest w analizie czujników.<br/>
+            • Podgląd jednostki wynikowej aktualizuje się na żywo.<br/>
+            • Po zatwierdzeniu kalibracji tabela wyników jest czyszczona — <b>należy
+            ponownie kliknąć „Oblicz parametry piku"</b>, aby uzyskać wartości wysokości
+            i głębokości w nowych jednostkach. Surowe dane pozostają nietknięte — kalibracja
+            jest zawsze stosowana jako krok post-processing.<br/>
+            • Aktywna kalibracja jest widoczna w prawej części paska stanu.</p>
+
+            <p><b>11. Dopasowanie krzywej</b><br/>
+            • Kliknij „Dopasowanie krzywej".<br/>
+            Modele te są funkcjami dopasowania matematycznego służącymi do wyznaczenia
+            parametrów piku (FWHM, centrum, amplituda); nie są modelami fizycznymi opisującymi
+            mechanizm elektrodowy — wybór modelu to kwestia jakości dopasowania kształtu,
+            nie interpretacji procesu.<br/>
+            • Wybierz <b>model</b>: <b>Gaussowski</b> — symetryczny, dzwonowy kształt; dobrze
+            dopasowuje się do w miarę symetrycznych pików. Uwaga: rzeczywisty pik CV
+            kontrolowany dyfuzją nie jest idealnie gaussowski (ma asymetryczny ogon), więc
+            model traktuj jako przybliżenie empiryczne.<br/>
+            <b>Lorentzowski</b> — symetryczny kształt o wolniej opadających (szerszych)
+            ogonach niż Gauss; bywa lepszym dopasowaniem, gdy pik ma szersze skrzydła.<br/>
+            <b>Asymetryczny Gaussowski</b> — dopuszcza różną szerokość po obu stronach piku
+            (parametr asymetrii); przydatny, gdy pik jest wyraźnie niesymetryczny.<br/>
+            • Wybierz <b>krzywą</b> (utlenianie/redukcja) — zakres X jest automatycznie
+            wypełniany wartościami bieżącej linii bazowej, możesz go zmodyfikować.<br/>
+            • Kliknij „Dopasuj". Wyniki: <b>FWHM</b> (szerokość połówkowa — szerokość piku
+            na połowie jego wysokości), <b>amplituda</b>, <b>centrum piku</b>,
+            <b>R²</b> (dopasowanie; &gt; 0,99 uznaje się za bardzo dobre), a dla modelu
+            asymetrycznego — <b>asymetria</b> (σ_prawa/σ_lewa).<br/>
+            • Zielona przerywana linia na wykresie dialogu to dopasowany model.<br/>
+            • Przycisk „Dodaj do tabeli wyników" przenosi parametry do głównej tabeli.<br/>
+            • Dialog jest niemodalny — możesz nadal pracować z głównym oknem.</p>
+
+            <hr/>
+
+            <p><b>Opcjonalne ustawienia</b><br/>
+            • Tryb jasny/ciemny – przełącznik w górnym pasku.<br/>
+            • Ręczna edycja osi – przycisk „Edytuj ustawienia osi".<br/>
+            • Zakładka „Teoria" w górnym pasku — rozbudowany podręcznik teoretyczny.</p>
+        </body>
+        </html>
+        """,
     },
     "en": {
         "window_title": "CVision: Cyclic Voltammogram Analysis",
@@ -319,6 +463,150 @@ TRANSLATIONS = {
         "msg_zeros_title": "Zero-crossings",
         "msg_zeros_found_header": "Zero-crossings found:\n",
         "msg_zeros_none": "No zero-crossings in the given range.",
+
+        "dlg_help_title": "Help – instructions",
+        "help_html_en": """
+        <html>
+        <body style="font-family:Arial; font-size:10pt;">
+            <p><b>1. Select measurement type</b><br/>
+            From the dropdown menu, choose "Oxidation" or "Reduction".</p>
+
+            <p><b>2. Load data</b><br/>
+            Click the "Open data file" button and load a text file (*.txt)
+            containing three columns: E [mV], I_oxidation [μA], I_reduction [μA].</p>
+
+            <p><b>3. Smoothing</b><br/>
+            •! <i>Smoothing is optional here and depends on the quality of the data.</i><br/>
+            • Check "Smoothing (Savitzky-Golay)".<br/>
+            • <b>Window</b>: the number of points averaged during smoothing (must be odd).
+            <b>Order</b>: the degree of the polynomial fitted locally within the window (typically 2–3;
+            must be smaller than the window).<br/>
+            <i>Note:</i> increasing the window above 15 is not recommended.</p>
+
+            <p><b>4. Set the baseline</b><br/>
+            The baseline can be set or adjusted in three ways:</p>
+            <p>• <b>Double-click:</b> <b>Oxidation</b>: Click "Oxidation range
+            (2x click)" and pick two points. <b>Reduction</b>: Click "Reduction range (2x click)"
+            and pick two points.
+
+            Place <b>both points</b> on a <b>linear segment of the voltammogram BEFORE the peak rises</b>
+            (on the left side of the peak) — where the current changes linearly and there is no redox activity yet.
+            The straight line connecting these points represents the background (non-faradaic) current and
+            will be <b>extrapolated</b> under the peak to estimate the baseline at the position of the maximum.
+            Do not place points on both sides of the peak — the line would then cross the peak instead of
+            forming its background, which would distort the height H.</p>
+            <p>• <b>Dragging with the mouse:</b> the colored baseline band can be grabbed by clicking on its area
+            and moved as a whole, then fine-tuned precisely by dragging its
+            vertical edges (border lines).</p>
+            <p>• <b>Numeric dialog "Edit baseline (numeric)":</b> lets you type
+            the potential values for the range edges. In practice: for oxidation, set the right
+            and left edge so the range extends BEYOND the peak maximum; for reduction,
+            likewise (the key point is that the baseline range must lie beyond the peak maximum).
+            Values are chosen roughly ("by eye"), making sure the baseline covers the area
+            outside the peak.</p>
+
+            <p><b>5. Compute peak parameters</b><br/>
+            Click "Compute peak parameters". The program will determine x_peak, y_peak, the baseline
+            value, and the height/depth of the peak for each curve, and display the results on the plot
+            and in the table. When BOTH peaks (oxidation and reduction) have been computed, the table
+            will additionally show: <b>E½</b> (half-wave potential), <b>ΔEp</b> (peak potential
+            separation, |E<sub>p,a</sub> − E<sub>p,c</sub>| — a reversibility parameter)
+            and <b>Ipa/Ipc</b> (the ratio of the anodic and cathodic peak currents — also a
+            reversibility parameter).</p>
+            <p><i>Baseline visualization after computation:</i> after clicking this button, the
+            colored baseline band loses its fill (the edges remain visible and draggable),
+            and a filled area appears in its place between the curve and the baseline
+            (below the oxidation curve / above the reduction curve) — clearly showing the
+            peak height. Dragging a baseline edge, re-selecting the range (2x click), or using
+            the numeric dialog restores edit mode (the filled band returns).</p>
+
+            <p><b>6. First derivative</b><br/>
+            <i>Optional step</i> — a helper tool for precisely locating extrema;
+            not required for basic peak analysis.<br/>
+            • Click "Compute derivative" — a separate window with the first-derivative
+            plot will open.<br/>
+            • The window has its own smoothing controls (independent of the settings in the
+            main window) and a "Zero-crossing range from:" / "to:" field with a "Find zero-crossings" button.<br/>
+            • The zero-crossings of the first derivative correspond to extrema — the apexes of the
+            oxidation and reduction peaks.<br/>
+            • When the window is closed, the found zero-crossings are appended to the results table
+            in the main window.</p>
+
+            <p><b>7. Second derivative</b><br/>
+            <i>Optional step</i> — especially useful when analyzing irreversible
+            processes, where the lack of a peak pair makes standard parameter determination difficult.<br/>
+            • Click "Compute second derivative" — just like with the first derivative,
+            a separate window with the second-derivative plot will open, with its own smoothing,
+            a range field, and a "Find zero-crossings" button.<br/>
+            • The zero-crossings of the second derivative correspond to the inflection points of the
+            voltammogram, useful especially when an irreversible process does not form a clear peak.<br/>
+            • When the window is closed, the found zero-crossings are appended to the results table
+            in the main window.</p>
+
+            <p><b>8. Export to Excel</b><br/>
+            Click "Export to Excel", choose a file name.
+            The following will be saved: raw data, smoothed data, derivatives, zero-crossings, peak results, and the chart.</p>
+
+            <hr/>
+
+            <p><b>9. Automatic peak detection</b><br/>
+            • Click "Auto-detect peaks".<br/>
+            • <b>Minimum peak height</b>: filters out noise — only peaks with an amplitude
+            greater than or equal to this value are counted as a peak. Set to 0 to disable the filter.<br/>
+            • <b>Minimum distance between peaks</b>: given in <i>data points</i>
+            (not in X-axis units). Prevents detecting several peaks within a single
+            broad maximum.<br/>
+            • Check the range(s) — oxidation and/or reduction — for which detection should run.<br/>
+            • Detected peaks are marked on the plot as <b>yellow circles</b> and
+            appended to the results table as "Pik auto (utl)" / "Pik auto (red)".</p>
+
+            <p><b>10. Unit calibration</b><br/>
+            • Click "Unit calibration".<br/>
+            • Enter the <b>electrode area</b> [cm²] and/or the <b>analyte concentration</b> [mM].<br/>
+            • Check the relevant checkboxes to normalize the current.
+            Normalization by area (μA/cm²) is a publication standard and allows
+            comparing measurements from electrodes of different sizes. Normalization
+            by concentration (μA/mM) is used in sensor analysis.<br/>
+            • The resulting-unit preview updates live.<br/>
+            • After confirming the calibration, the results table is cleared — <b>you need to
+            click "Compute peak parameters" again</b> to obtain the height and depth values
+            in the new units. The raw data remains untouched — calibration is always applied
+            as a post-processing step.<br/>
+            • The active calibration is shown on the right side of the status bar.</p>
+
+            <p><b>11. Curve fitting</b><br/>
+            • Click "Curve fitting".<br/>
+            These models are mathematical fitting functions used to determine
+            peak parameters (FWHM, center, amplitude); they are not physical models describing
+            the electrode mechanism — the choice of model is a matter of shape-fitting quality,
+            not process interpretation.<br/>
+            • Choose a <b>model</b>: <b>Gaussian</b> — a symmetric, bell-shaped curve; fits
+            reasonably symmetric peaks well. Note: a real diffusion-controlled CV peak is
+            not perfectly Gaussian (it has an asymmetric tail), so treat the
+            model as an empirical approximation.<br/>
+            <b>Lorentzian</b> — a symmetric shape with more slowly decaying (wider)
+            tails than the Gaussian; can be a better fit when the peak has wider wings.<br/>
+            <b>Asymmetric Gaussian</b> — allows a different width on each side of the peak
+            (an asymmetry parameter); useful when the peak is clearly non-symmetric.<br/>
+            • Choose the <b>curve</b> (oxidation/reduction) — the X range is automatically
+            filled with the values of the current baseline; you can modify it.<br/>
+            • Click "Fit". Results: <b>FWHM</b> (full width at half maximum — the width of the peak
+            at half its height), <b>amplitude</b>, <b>peak center</b>,
+            <b>R²</b> (goodness of fit; &gt; 0.99 is considered very good), and for the
+            asymmetric model — <b>asymmetry</b> (σ_right/σ_left).<br/>
+            • The green dashed line on the dialog's plot is the fitted model.<br/>
+            • The "Add to results table" button transfers the parameters to the main table.<br/>
+            • The dialog is non-modal — you can keep working with the main window.</p>
+
+            <hr/>
+
+            <p><b>Optional settings</b><br/>
+            • Light/dark theme – switch in the top toolbar.<br/>
+            • Manual axis editing – "Edit axis settings" button.<br/>
+            • The "Theory" tab in the top toolbar — an extensive theoretical handbook.</p>
+        </body>
+        </html>
+        """,
     },
 }
 

@@ -997,150 +997,11 @@ class MainWindow(QtWidgets.QMainWindow):
             )
 
     def show_help(self):
-        help_text = """
-        <html>
-        <body style="font-family:Arial; font-size:10pt;">
-            <p><b>1. Wybór typu pomiaru</b><br/>
-            Z rozwijanego menu wybierz "Utlenianie" lub "Redukcja".</p>
-
-            <p><b>2. Wczytanie danych</b><br/>
-            Kliknij przycisk „Wybierz plik z danymi" i załaduj plik tekstowy (*.txt)
-            zawierający trzy kolumny: E [mV], I_utlenianie [μA], I_redukcja [μA].</p>
-
-            <p><b>3. Wygładzenie</b><br/>
-            •! <i>W tym miejscu ustawienie wygładzania jest opcjonalne i zależy od jakości danych.</i><br/>
-            • Zaznacz „Wygładzanie (Savitzky-Golay)".<br/>
-            • <b>Okno</b>: liczba punktów uśrednianych przy wygładzaniu (musi być nieparzysta).
-            <b>Stopień</b>: rząd wielomianu dopasowywanego lokalnie w oknie (typowo 2–3;
-            musi być mniejszy niż okno).<br/>
-            <i>Uwaga:</i> niezalecane jest zwiększanie okna powyżej 15.</p>
-
-            <p><b>4. Wybór linii bazowej</b><br/>
-            Linię bazową można ustawić lub skorygować na trzy sposoby:</p>
-            <p>• <b>Dwukrotne kliknięcie:</b> <b>Utlenianie</b>: Kliknij „Zakres utlenienia
-            (2× klik)" i wskaż dwa punkty. <b>Redukcja</b>: Kliknij „Zakres redukcji (2× klik)"
-            i wskaż dwa punkty.
-
-            <b>Oba punkty</b> umieść na <b>liniowym fragmencie woltamogramu PRZED narastaniem piku</b>
-            (po lewej stronie piku) — tam, gdzie prąd zmienia się liniowo i nie ma jeszcze aktywności redoks.
-            Prosta łącząca te punkty reprezentuje prąd tła (niefaradajowski) i zostanie
-            <b>ekstrapolowana</b> pod pik, aby oszacować linię bazową w położeniu maksimum.
-            Nie umieszczaj punktów po obu stronach piku — linia przecinałaby wtedy pik zamiast
-            stanowić jego tło, co zafałszuje wysokość H.</p>
-            <p>• <b>Przeciąganie myszą:</b> kolorowy pas bazy można chwycić klikając na jego pole
-            i przesunąć go w całości, a następnie dostroić zakres precyzyjnie, przeciągając
-            pionowe krawędzie (linie brzegowe) pasa.</p>
-            <p>• <b>Dialog numeryczny „Edytuj linię bazową (numerycznie)":</b> pozwala wpisać
-            wartości potencjału dla krawędzi zakresu. W praktyce: dla utleniania ustawia się
-            prawą i lewą krawędź tak, aby zakres sięgał POZA maksimum piku; dla redukcji
-            analogicznie (kluczowe jest, aby zakres bazy znalazł się poza maksimum piku).
-            Wartości dobiera się orientacyjnie ("na oko"), pilnując, by baza obejmowała obszar
-            poza pikiem.</p>
-
-            <p><b>5. Obliczenie parametrów piku</b><br/>
-            Kliknij „Oblicz parametry piku". Program wyznaczy x_peak, y_peak, linię bazową
-            oraz wysokość/głębokość piku dla każdej z krzywych, a wyniki wyświetli na wykresie
-            i w tabeli. Gdy policzone zostaną OBA piki (utlenianie i redukcja), w tabeli
-            dodatkowo pojawią się: <b>E½</b> (potencjał półfalowy), <b>ΔEp</b> (rozdzielenie
-            potencjałów pików, |E<sub>p,a</sub> − E<sub>p,c</sub>| — parametr odwracalności)
-            oraz <b>Ipa/Ipc</b> (stosunek prądów pików anodowego i katodowego — również
-            parametr odwracalności).</p>
-            <p><i>Wizualizacja bazy po obliczeniu:</i> po kliknięciu tego przycisku kolorowy
-            pas linii bazowej traci wypełnienie (krawędzie pozostają widoczne i przeciągalne),
-            a w jego miejsce pojawia się wypełnienie obszaru między krzywą a linią bazową
-            (pod krzywą utleniania / nad krzywą redukcji) — co czytelnie pokazuje wysokość
-            piku. Przeciągnięcie krawędzi bazy, ponowny wybór zakresu (2× klik) lub użycie
-            dialogu numerycznego przywraca tryb edycji (pas z wypełnieniem wraca).</p>
-
-            <p><b>6. Pierwsza pochodna</b><br/>
-            <i>Krok opcjonalny</i> — pomocniczy, służy do precyzyjnej lokalizacji ekstremów;
-            nie jest wymagany do podstawowej analizy piku.<br/>
-            • Kliknij „Oblicz pochodną" — otworzy się osobne okno z wykresem pierwszej
-            pochodnej.<br/>
-            • Okno ma własne kontrolki wygładzania (niezależne od ustawień w głównym oknie)
-            oraz pole „Zakres miejsc zerowych od/do" z przyciskiem „Znajdź miejsca zerowe".<br/>
-            • Miejsca zerowe pierwszej pochodnej odpowiadają ekstremom — wierzchołkom pików
-            utleniania i redukcji.<br/>
-            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
-            w głównym oknie.</p>
-
-            <p><b>7. Druga pochodna</b><br/>
-            <i>Krok opcjonalny</i> — szczególnie przydatny przy analizie procesów
-            nieodwracalnych, gdzie brak pary pików utrudnia zwykłe wyznaczanie parametrów.<br/>
-            • Kliknij „Oblicz drugą pochodną" — analogicznie jak przy pierwszej pochodnej,
-            otworzy się osobne okno z wykresem drugiej pochodnej, własnym wygładzaniem,
-            polem zakresu i przyciskiem „Znajdź miejsca zerowe".<br/>
-            • Miejsca zerowe drugiej pochodnej odpowiadają punktom przegięcia woltamogramu,
-            przydatnym zwłaszcza wtedy, gdy proces nieodwracalny nie tworzy wyraźnego piku.<br/>
-            • Po zamknięciu okna znalezione miejsca zerowe zostają dopisane do tabeli wyników
-            w głównym oknie.</p>
-
-            <p><b>8. Eksport do Excela</b><br/>
-            Kliknij „Eksport do Excela", wybierz nazwę pliku.
-            Zapisane zostaną: surowe dane, dane wygładzone, pochodne, miejsca zerowe, wyniki piku i wykres.</p>
-
-            <hr/>
-
-            <p><b>9. Automatyczne wykrywanie pików</b><br/>
-            • Kliknij „Wykryj piki automatycznie".<br/>
-            • <b>Minimalna wysokość piku</b>: filtruje szum — tylko piki o amplitudzie
-            większej lub równej tej wartości zostaną uznane za pik. Ustaw 0, aby wyłączyć filtr.<br/>
-            • <b>Minimalna odległość między pikami</b>: podawana w <i>punktach danych</i>
-            (nie w jednostkach osi X). Zapobiega wykrywaniu kilku pików w obrębie jednego
-            szerokiego maksimum.<br/>
-            • Zaznacz zakres(y) — utlenienia i/lub redukcji — dla których ma być uruchomione wyszukiwanie.<br/>
-            • Wykryte piki są nanoszone na wykres jako <b>żółte kółka</b> oraz
-            dopisywane do tabeli wyników jako „Pik auto (utl)" / „Pik auto (red)".</p>
-
-            <p><b>10. Kalibracja jednostek</b><br/>
-            • Kliknij „Kalibracja jednostek".<br/>
-            • Podaj <b>powierzchnię elektrody</b> [cm²] oraz/lub <b>stężenie analitu</b> [mM].<br/>
-            • Zaznacz odpowiednie checkboxy, aby znormalizować prąd.
-            Normalizacja względem powierzchni (μA/cm²) jest standardem publikacyjnym
-            i pozwala porównywać pomiary z elektrod o różnych rozmiarach. Normalizacja
-            względem stężenia (μA/mM) stosowana jest w analizie czujników.<br/>
-            • Podgląd jednostki wynikowej aktualizuje się na żywo.<br/>
-            • Po zatwierdzeniu kalibracji tabela wyników jest czyszczona — <b>należy
-            ponownie kliknąć „Oblicz parametry piku"</b>, aby uzyskać wartości wysokości
-            i głębokości w nowych jednostkach. Surowe dane pozostają nietknięte — kalibracja
-            jest zawsze stosowana jako krok post-processing.<br/>
-            • Aktywna kalibracja jest widoczna w prawej części paska stanu.</p>
-
-            <p><b>11. Dopasowanie krzywej</b><br/>
-            • Kliknij „Dopasowanie krzywej".<br/>
-            Modele te są funkcjami dopasowania matematycznego służącymi do wyznaczenia
-            parametrów piku (FWHM, centrum, amplituda); nie są modelami fizycznymi opisującymi
-            mechanizm elektrodowy — wybór modelu to kwestia jakości dopasowania kształtu,
-            nie interpretacji procesu.<br/>
-            • Wybierz <b>model</b>: <b>Gaussowski</b> — symetryczny, dzwonowy kształt; dobrze
-            dopasowuje się do w miarę symetrycznych pików. Uwaga: rzeczywisty pik CV
-            kontrolowany dyfuzją nie jest idealnie gaussowski (ma asymetryczny ogon), więc
-            model traktuj jako przybliżenie empiryczne.<br/>
-            <b>Lorentzowski</b> — symetryczny kształt o wolniej opadających (szerszych)
-            ogonach niż Gauss; bywa lepszym dopasowaniem, gdy pik ma szersze skrzydła.<br/>
-            <b>Asymetryczny Gaussowski</b> — dopuszcza różną szerokość po obu stronach piku
-            (parametr asymetrii); przydatny, gdy pik jest wyraźnie niesymetryczny.<br/>
-            • Wybierz <b>krzywą</b> (utlenianie/redukcja) — zakres X jest automatycznie
-            wypełniany wartościami bieżącej linii bazowej, możesz go zmodyfikować.<br/>
-            • Kliknij „Dopasuj". Wyniki: <b>FWHM</b> (szerokość połówkowa — szerokość piku
-            na połowie jego wysokości), <b>amplituda</b>, <b>centrum piku</b>,
-            <b>R²</b> (dopasowanie; &gt; 0,99 uznaje się za bardzo dobre), a dla modelu
-            asymetrycznego — <b>asymetria</b> (σ_prawa/σ_lewa).<br/>
-            • Zielona przerywana linia na wykresie dialogu to dopasowany model.<br/>
-            • Przycisk „Dodaj do tabeli wyników" przenosi parametry do głównej tabeli.<br/>
-            • Dialog jest niemodalny — możesz nadal pracować z głównym oknem.</p>
-
-            <hr/>
-
-            <p><b>Opcjonalne ustawienia</b><br/>
-            • Tryb jasny/ciemny – przełącznik w górnym pasku.<br/>
-            • Ręczna edycja osi – przycisk „Edytuj ustawienia osi".<br/>
-            • Zakładka „Teoria" w górnym pasku — rozbudowany podręcznik teoretyczny.</p>
-        </body>
-        </html>
-        """
+        # Reads the current language once, at open time (no live retranslation),
+        # same convention as the standalone dialogs.
+        help_text = self.tr_(f"help_html_{self.current_language}")
         dialog = QtWidgets.QDialog(self)
-        dialog.setWindowTitle("Help – instrukcja")
+        dialog.setWindowTitle(self.tr_("dlg_help_title"))
         dialog.setMinimumSize(400, 300)
         dialog.resize(700, 600)
         layout = QtWidgets.QVBoxLayout(dialog)
@@ -1150,7 +1011,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(browser)
         btn_row = QtWidgets.QHBoxLayout()
         btn_row.addStretch(1)
-        close_btn = QtWidgets.QPushButton("Zamknij")
+        close_btn = QtWidgets.QPushButton(self.tr_("btn_close"))
         close_btn.clicked.connect(dialog.accept)
         btn_row.addWidget(close_btn)
         layout.addLayout(btn_row)
