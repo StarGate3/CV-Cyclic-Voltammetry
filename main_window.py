@@ -986,9 +986,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
             <p><b>11. Dopasowanie krzywej</b><br/>
             • Kliknij „Dopasowanie krzywej".<br/>
-            • Wybierz <b>model</b>: Gaussowski (piki symetryczne, dyfuzyjne),
-            Lorentzowski (piki z szerokimi ogonami, np. szybkie procesy kinetyczne),
-            Asymetryczny Gaussowski (piki zniekształcone, np. sprzężone procesy).<br/>
+            Modele te są funkcjami dopasowania matematycznego służącymi do wyznaczenia
+            parametrów piku (FWHM, centrum, amplituda); nie są modelami fizycznymi opisującymi
+            mechanizm elektrodowy — wybór modelu to kwestia jakości dopasowania kształtu,
+            nie interpretacji procesu.<br/>
+            • Wybierz <b>model</b>: <b>Gaussowski</b> — symetryczny, dzwonowy kształt; dobrze
+            dopasowuje się do w miarę symetrycznych pików. Uwaga: rzeczywisty pik CV
+            kontrolowany dyfuzją nie jest idealnie gaussowski (ma asymetryczny ogon), więc
+            model traktuj jako przybliżenie empiryczne.<br/>
+            <b>Lorentzowski</b> — symetryczny kształt o wolniej opadających (szerszych)
+            ogonach niż Gauss; bywa lepszym dopasowaniem, gdy pik ma szersze skrzydła.<br/>
+            <b>Asymetryczny Gaussowski</b> — dopuszcza różną szerokość po obu stronach piku
+            (parametr asymetrii); przydatny, gdy pik jest wyraźnie niesymetryczny.<br/>
             • Wybierz <b>krzywą</b> (utlenianie/redukcja) — zakres X jest automatycznie
             wypełniany wartościami bieżącej linii bazowej, możesz go zmodyfikować.<br/>
             • Kliknij „Dopasuj". Wyniki: <b>FWHM</b> (szerokość połówkowa — szerokość piku
