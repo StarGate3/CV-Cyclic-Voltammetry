@@ -993,7 +993,20 @@ class MainWindow(QtWidgets.QMainWindow):
         <body>
             <h4 align="center">CVision</h4>
             <h4>Analiza woltamogramu cyklicznego</h4>
-            <p>Wersja: 3.1</p>
+            <p>Wersja: 3.2</p>
+            <p><b>Nowości w wersji 3.2:</b></p>
+            <ul>
+                <li>Czytelniejsza wizualizacja linii bazowej — po obliczeniu parametrów piku
+                    zakres bazy jest pokazywany jako wypełnienie obszaru pod/nad krzywą
+                    względem linii bazowej (zamiast pełnego pionowego pasa)</li>
+                <li>Poprawki stabilności: obsługa błędu wygładzania dla krótkich serii danych,
+                    bezpieczny zapis pliku Excel</li>
+            </ul>
+            <p><b>Nowości w wersji 3.1:</b></p>
+            <ul>
+                <li>ΔEp — rozdzielenie potencjałów pików (parametr diagnostyczny odwracalności)</li>
+                <li>Ipa/Ipc — stosunek prądów pików anodowego i katodowego (parametr odwracalności)</li>
+            </ul>
             <p><b>Nowości w wersji 3.0:</b></p>
             <ul>
                 <li>Automatyczne wykrywanie pików (scipy.signal.find_peaks)</li>
@@ -1090,6 +1103,18 @@ class MainWindow(QtWidgets.QMainWindow):
         <p style="margin-left:2em;"><b>E½ = (E<sub>p,a</sub> + E<sub>p,c</sub>) / 2</b></p>
         <p>E½ jest bliski formalnemu potencjałowi redoks i charakteryzuje daną parę
         redoks niezależnie od szybkości skanowania (dla procesu odwracalnego).</p>
+
+        <h3>ΔEp — rozdzielenie potencjałów pików</h3>
+        <p>ΔEp to bezwzględna różnica potencjałów piku anodowego (utleniania) i katodowego
+        (redukcji):</p>
+        <p style="margin-left:2em;"><b>ΔEp = |E<sub>p,a</sub> − E<sub>p,c</sub>|</b></p>
+        <p>ΔEp jest podstawowym kryterium odwracalności układu redoks. Dla procesu
+        odwracalnego, jednoelektronowego, w temperaturze 25 °C teoretyczna wartość wynosi
+        <b>ΔEp ≈ 59/n mV</b>, gdzie n to liczba wymienianych elektronów. Wartości ΔEp bliskie
+        59/n mV wskazują na proces odwracalny; wyraźnie większe wartości świadczą o kinetyce
+        quasi-odwracalnej lub nieodwracalnej, często związanej z wolnym transferem elektronu.
+        W praktyce na ΔEp wpływa też opór roztworu (spadek omowy iR), co może zawyżać
+        obserwowaną wartość.</p>
         """
 
         baseline = """
@@ -1175,6 +1200,17 @@ class MainWindow(QtWidgets.QMainWindow):
         </ul>
         <p>Liniowa zależność i<sub>p</sub> od √v jest diagnostyką procesu
         kontrolowanego dyfuzją.</p>
+        <p>Ponieważ prąd piku i<sub>p</sub> jest wprost proporcjonalny do stężenia analitu C
+        (zgodnie z równaniem Randlesa-Ševčíka), wysokość piku stanowi podstawę ilościowego
+        oznaczania stężenia metodą krzywej kalibracyjnej.</p>
+
+        <h3>Automatyczne wykrywanie pików</h3>
+        <p>Program może automatycznie lokalizować piki metodą <b>find_peaks</b>, wykrywającą
+        lokalne maksima/minima spełniające kryteria minimalnej wysokości i minimalnej odległości
+        między pikami. Różni się to od ręcznego wyznaczania parametrów piku przez linię bazową:
+        automatyczna detekcja szybko wskazuje położenie pików, natomiast dokładne parametry
+        (wysokość względem tła, baseline) wyznacza się metodą linii bazowej. Kryteria minimalnej
+        wysokości i odległości służą do odfiltrowania szumu i nieistotnych lokalnych ekstremów.</p>
         """
 
         derivatives = """
