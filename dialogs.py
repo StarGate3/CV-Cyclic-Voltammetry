@@ -460,11 +460,11 @@ class CalibrationDialog(QtWidgets.QDialog):
         self.accept()
 
 
-_MODEL_LABEL_TO_KEY = {
-    "Gaussowski": "gaussian",
-    "Lorentzowski": "lorentzian",
-    "Asymetryczny Gaussowski": "asymmetric_gaussian",
-}
+_MODEL_LABEL_KEY_TO_MODEL_KEY = [
+    ("model_gaussian", "gaussian"),
+    ("model_lorentzian", "lorentzian"),
+    ("model_asym_gaussian", "asymmetric_gaussian"),
+]
 
 
 class CurveFittingDialog(QtWidgets.QDialog):
@@ -475,7 +475,7 @@ class CurveFittingDialog(QtWidgets.QDialog):
     def __init__(self, x, y1, y2, baseline_settings, x_label='E [mV]',
                  y_unit_label='μA', parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Dopasowanie krzywej")
+        self.setWindowTitle(tr('dlg_curvefit_title'))
         self.setModal(False)
         self._x = np.asarray(x, dtype=float)
         self._y1 = np.asarray(y1, dtype=float)
@@ -496,32 +496,32 @@ class CurveFittingDialog(QtWidgets.QDialog):
 
         form = QtWidgets.QFormLayout()
         self.model_combo = QtWidgets.QComboBox()
-        for label, model_key in _MODEL_LABEL_TO_KEY.items():
-            self.model_combo.addItem(label, model_key)
-        form.addRow("Model:", self.model_combo)
+        for label_key, model_key in _MODEL_LABEL_KEY_TO_MODEL_KEY:
+            self.model_combo.addItem(tr(label_key), model_key)
+        form.addRow(tr('lbl_model'), self.model_combo)
 
         self.curve_combo = QtWidgets.QComboBox()
-        self.curve_combo.addItems(["Utlenianie", "Redukcja"])
+        self.curve_combo.addItems([tr('combo_oxidation'), tr('combo_reduction')])
         self.curve_combo.currentIndexChanged.connect(self._prefill_range_from_baseline)
-        form.addRow("Krzywa:", self.curve_combo)
+        form.addRow(tr('lbl_curve'), self.curve_combo)
 
         self.x_min_spin = QtWidgets.QDoubleSpinBox()
         self.x_min_spin.setRange(-1e9, 1e9)
         self.x_min_spin.setDecimals(3)
-        form.addRow("Zakres X — od:", self.x_min_spin)
+        form.addRow(tr('lbl_xrange_from'), self.x_min_spin)
 
         self.x_max_spin = QtWidgets.QDoubleSpinBox()
         self.x_max_spin.setRange(-1e9, 1e9)
         self.x_max_spin.setDecimals(3)
-        form.addRow("Zakres X — do:", self.x_max_spin)
+        form.addRow(tr('lbl_xrange_to'), self.x_max_spin)
 
         layout.addLayout(form)
 
-        self.fit_button = QtWidgets.QPushButton("Dopasuj")
+        self.fit_button = QtWidgets.QPushButton(tr('btn_fit'))
         self.fit_button.clicked.connect(self._run_fit)
         layout.addWidget(self.fit_button)
 
-        self.results_group = QtWidgets.QGroupBox("Wyniki")
+        self.results_group = QtWidgets.QGroupBox(tr('grp_results'))
         res_layout = QtWidgets.QFormLayout(self.results_group)
         self.fwhm_label = QtWidgets.QLabel("—")
         self.center_label = QtWidgets.QLabel("—")
@@ -529,29 +529,29 @@ class CurveFittingDialog(QtWidgets.QDialog):
         self.asymmetry_value_label = QtWidgets.QLabel("—")
         self.r2_label = QtWidgets.QLabel("—")
         self.fwhm_unit_label = QtWidgets.QLabel(self._extract_x_unit())
-        res_layout.addRow("FWHM:", self.fwhm_label)
-        res_layout.addRow("Centrum piku:", self.center_label)
-        res_layout.addRow("Amplituda:", self.amplitude_label)
-        self._asymmetry_key_label = QtWidgets.QLabel("Asymetria:")
+        res_layout.addRow(tr('lbl_fwhm'), self.fwhm_label)
+        res_layout.addRow(tr('lbl_peak_center'), self.center_label)
+        res_layout.addRow(tr('lbl_amplitude'), self.amplitude_label)
+        self._asymmetry_key_label = QtWidgets.QLabel(tr('lbl_asymmetry'))
         res_layout.addRow(self._asymmetry_key_label, self.asymmetry_value_label)
-        res_layout.addRow("R²:", self.r2_label)
-        res_layout.addRow("Jednostka FWHM:", self.fwhm_unit_label)
+        res_layout.addRow(tr('lbl_r_squared'), self.r2_label)
+        res_layout.addRow(tr('lbl_fwhm_unit'), self.fwhm_unit_label)
         self.results_group.setVisible(False)
         layout.addWidget(self.results_group)
 
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setLabel('bottom', self._x_label)
-        self.plot_widget.setLabel('left', f"Prąd [{self._y_unit_label}]")
+        self.plot_widget.setLabel('left', f"{tr('axis_y_current')} [{self._y_unit_label}]")
         self.plot_widget.addLegend()
         self.plot_widget.setMinimumHeight(260)
         layout.addWidget(self.plot_widget)
 
         btn_row = QtWidgets.QHBoxLayout()
-        self.add_button = QtWidgets.QPushButton("Dodaj do tabeli wyników")
+        self.add_button = QtWidgets.QPushButton(tr('btn_add_to_results'))
         self.add_button.setEnabled(False)
         self.add_button.clicked.connect(self._on_add_to_table)
         btn_row.addWidget(self.add_button)
-        close_btn = QtWidgets.QPushButton("Zamknij")
+        close_btn = QtWidgets.QPushButton(tr('btn_close'))
         close_btn.clicked.connect(self.close)
         btn_row.addWidget(close_btn)
         layout.addLayout(btn_row)
@@ -626,14 +626,14 @@ class CurveFittingDialog(QtWidgets.QDialog):
         x_crop = self._x[mask]
         y_crop = self._current_y()[mask]
         data_color = 'b' if self.curve_combo.currentIndex() == 0 else 'r'
-        data_name = "Utlenianie" if self.curve_combo.currentIndex() == 0 else "Redukcja"
+        data_name = tr('combo_oxidation') if self.curve_combo.currentIndex() == 0 else tr('combo_reduction')
         self.plot_widget.plot(
             x_crop, y_crop, pen=pg.mkPen(color=data_color, width=2), name=data_name
         )
         self.plot_widget.plot(
             result['x_fit'], result['y_fit'],
             pen=pg.mkPen(color='g', width=2, style=QtCore.Qt.PenStyle.DashLine),
-            name="Dopasowanie"
+            name=tr('legend_fit')
         )
 
     def _on_add_to_table(self):
