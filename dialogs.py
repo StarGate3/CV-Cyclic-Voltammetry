@@ -134,7 +134,7 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
             current_settings (dict): Aktualne ustawienia bazowe.
         """
         super().__init__(parent)
-        self.setWindowTitle("Ustawienia linii bazowej (numerycznie)")
+        self.setWindowTitle(tr("dlg_baseline_title"))
         self.current_settings = current_settings
         # Zachowujemy oryginalne ustawienia do obliczeń
         self.initial_settings = {
@@ -172,8 +172,8 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         ox_layout.addWidget(ox_x2)
         ox_layout.addWidget(QtWidgets.QLabel("y2:"))
         ox_layout.addWidget(ox_y2)
-        layout.addRow("Utlenienie:", ox_layout)
-        self.ox_preview_label = QtWidgets.QLabel("Podgląd wartości: Punkty nie są jeszcze zainicjalizowane")
+        layout.addRow(tr("lbl_oxidation"), ox_layout)
+        self.ox_preview_label = QtWidgets.QLabel(tr("baseline_preview_uninit"))
         layout.addRow(self.ox_preview_label)
         self.ox_x1 = ox_x1
         self.ox_y1 = ox_y1
@@ -206,8 +206,8 @@ class BaselineSettingsDialog(QtWidgets.QDialog):
         red_layout.addWidget(red_x2)
         red_layout.addWidget(QtWidgets.QLabel("y2:"))
         red_layout.addWidget(red_y2)
-        layout.addRow("Redukcja:", red_layout)
-        self.red_preview_label = QtWidgets.QLabel("Podgląd wartości: Punkty nie są jeszcze zainicjalizowane")
+        layout.addRow(tr("lbl_reduction"), red_layout)
+        self.red_preview_label = QtWidgets.QLabel(tr("baseline_preview_uninit"))
         layout.addRow(self.red_preview_label)
         self.red_x1 = red_x1
         self.red_y1 = red_y1
@@ -379,7 +379,7 @@ class CalibrationDialog(QtWidgets.QDialog):
 
     def __init__(self, current_settings, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Kalibracja jednostek")
+        self.setWindowTitle(tr("dlg_calibration_title"))
         self._current = current_settings
         self._init_ui()
         self._update_unit_preview()
@@ -391,9 +391,9 @@ class CalibrationDialog(QtWidgets.QDialog):
         self.area_spin.setRange(0.001, 1000.0)
         self.area_spin.setDecimals(4)
         self.area_spin.setValue(self._current.electrode_area)
-        layout.addRow("Powierzchnia elektrody [cm²]:", self.area_spin)
+        layout.addRow(tr("lbl_electrode_area"), self.area_spin)
 
-        self.normalize_area_check = QtWidgets.QCheckBox("Normalizuj względem powierzchni elektrody")
+        self.normalize_area_check = QtWidgets.QCheckBox(tr("chk_normalize_area"))
         self.normalize_area_check.setChecked(self._current.normalize_by_area)
         layout.addRow(self.normalize_area_check)
 
@@ -401,9 +401,9 @@ class CalibrationDialog(QtWidgets.QDialog):
         self.concentration_spin.setRange(0.0001, 10000.0)
         self.concentration_spin.setDecimals(4)
         self.concentration_spin.setValue(self._current.concentration)
-        layout.addRow("Stężenie analitu [mM]:", self.concentration_spin)
+        layout.addRow(tr("lbl_analyte_conc"), self.concentration_spin)
 
-        self.normalize_conc_check = QtWidgets.QCheckBox("Normalizuj względem stężenia")
+        self.normalize_conc_check = QtWidgets.QCheckBox(tr("chk_normalize_conc"))
         self.normalize_conc_check.setChecked(self._current.normalize_by_concentration)
         layout.addRow(self.normalize_conc_check)
 
@@ -419,8 +419,8 @@ class CalibrationDialog(QtWidgets.QDialog):
             QtWidgets.QDialogButtonBox.StandardButton.Reset,
             parent=self
         )
-        buttons.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText("Anuluj")
-        buttons.button(QtWidgets.QDialogButtonBox.StandardButton.Reset).setText("Resetuj")
+        buttons.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText(tr("btn_cancel"))
+        buttons.button(QtWidgets.QDialogButtonBox.StandardButton.Reset).setText(tr("btn_reset"))
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
         buttons.button(QtWidgets.QDialogButtonBox.StandardButton.Reset).clicked.connect(self._on_reset)
@@ -437,7 +437,7 @@ class CalibrationDialog(QtWidgets.QDialog):
     def _update_unit_preview(self):
         import numpy as np
         _, unit = apply_calibration(np.array([0.0]), self._build_settings())
-        self.unit_preview_label.setText(f"Jednostka wynikowa: {unit}")
+        self.unit_preview_label.setText(f"{tr('lbl_unit_result')} {unit}")
 
     def _on_reset(self):
         defaults = CalibrationSettings()

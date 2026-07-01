@@ -90,6 +90,20 @@ TRANSLATIONS = {
         "lbl_zero_range_from": "Zakres miejsc zerowych od:",
         "lbl_zero_range_to": "do:",
         "btn_find_zeros": "Znajdź miejsca zerowe",
+
+        "dlg_baseline_title": "Ustawienia linii bazowej (numerycznie)",
+        "lbl_oxidation": "Utlenienie:",
+        "lbl_reduction": "Redukcja:",
+        "baseline_preview_uninit": "Podgląd wartości: Punkty nie są jeszcze zainicjalizowane",
+
+        "dlg_calibration_title": "Kalibracja jednostek",
+        "lbl_electrode_area": "Powierzchnia elektrody [cm²]:",
+        "lbl_analyte_conc": "Stężenie analitu [mM]:",
+        "chk_normalize_area": "Normalizuj względem powierzchni elektrody",
+        "chk_normalize_conc": "Normalizuj względem stężenia",
+        "btn_cancel": "Anuluj",
+        "btn_reset": "Resetuj",
+        "lbl_unit_result": "Jednostka wynikowa:",
     },
     "en": {
         "window_title": "CVision: Cyclic Voltammogram Analysis",
@@ -163,6 +177,20 @@ TRANSLATIONS = {
         "lbl_zero_range_from": "Zero-crossing range from:",
         "lbl_zero_range_to": "to:",
         "btn_find_zeros": "Find zero-crossings",
+
+        "dlg_baseline_title": "Baseline settings (numeric)",
+        "lbl_oxidation": "Oxidation:",
+        "lbl_reduction": "Reduction:",
+        "baseline_preview_uninit": "Value preview: Points not initialized yet",
+
+        "dlg_calibration_title": "Unit calibration",
+        "lbl_electrode_area": "Electrode area [cm²]:",
+        "lbl_analyte_conc": "Analyte concentration [mM]:",
+        "chk_normalize_area": "Normalize by electrode area",
+        "chk_normalize_conc": "Normalize by concentration",
+        "btn_cancel": "Cancel",
+        "btn_reset": "Reset",
+        "lbl_unit_result": "Resulting unit:",
     },
 }
 
