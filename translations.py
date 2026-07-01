@@ -312,6 +312,287 @@ TRANSLATIONS = {
         </body>
         </html>
         """,
+
+        "dlg_theory_title": "Teoria — podręcznik",
+
+        "theory_tab1_title_pl": "Woltametria cykliczna",
+        "theory_tab1_html_pl": """
+        <h3>Woltametria cykliczna (CV)</h3>
+        <p><b>Czym jest CV?</b> Woltametria cykliczna to technika elektroanalityczna,
+        w której potencjał elektrody roboczej jest zmieniany liniowo w czasie między
+        dwiema wartościami granicznymi, a następnie zawracany — tworząc cykl. Jednocześnie
+        rejestrowany jest prąd płynący przez elektrodę.</p>
+
+        <h3>Zasada działania</h3>
+        <p>Potencjostat wymusza na elektrodzie roboczej zadany potencjał względem elektrody
+        odniesienia, a prąd mierzy między elektrodą roboczą a pomocniczą. Zmiana potencjału
+        wywołuje reakcje utleniania (na krzywej narastającej) i redukcji (na krzywej
+        opadającej) substancji elektroaktywnej.</p>
+
+        <h3>Opis woltamogramu</h3>
+        <ul>
+            <li><b>Oś X — potencjał E [mV lub V]:</b> narzucona siła elektrochemiczna.</li>
+            <li><b>Oś Y — prąd I [μA]:</b> odpowiedź układu. Konwencja IUPAC: prądy
+            anodowe (utlenianie) dodatnie, katodowe (redukcja) ujemne.</li>
+        </ul>
+
+        <h3>Piki utleniania i redukcji</h3>
+        <p><b>Pik anodowy (ip,a)</b> pojawia się podczas skanu w kierunku dodatnich
+        potencjałów i odpowiada utlenianiu analitu na elektrodzie. <b>Pik katodowy
+        (ip,c)</b> pojawia się podczas skanu wstecznego i odpowiada redukcji produktu
+        utlenienia. Obecność obu pików świadczy o procesie co najmniej quasi-odwracalnym.</p>
+
+        <h3>Potencjał półfalowy E½</h3>
+        <p>Dla procesu odwracalnego E½ definiuje się jako średnią arytmetyczną potencjałów
+        piku anodowego i katodowego:</p>
+        <p style="margin-left:2em;"><b>E½ = (E<sub>p,a</sub> + E<sub>p,c</sub>) / 2</b></p>
+        <p>E½ jest bliski formalnemu potencjałowi redoks i charakteryzuje daną parę
+        redoks niezależnie od szybkości skanowania (dla procesu odwracalnego).</p>
+
+        <h3>ΔEp — rozdzielenie potencjałów pików</h3>
+        <p>ΔEp to bezwzględna różnica potencjałów piku anodowego (utleniania) i katodowego
+        (redukcji):</p>
+        <p style="margin-left:2em;"><b>ΔEp = |E<sub>p,a</sub> − E<sub>p,c</sub>|</b></p>
+        <p>ΔEp jest podstawowym kryterium odwracalności układu redoks. Dla procesu
+        odwracalnego, jednoelektronowego, w temperaturze 25 °C teoretyczna wartość wynosi
+        <b>ΔEp ≈ 59/n mV</b>, gdzie n to liczba wymienianych elektronów. Wartości ΔEp bliskie
+        59/n mV wskazują na proces odwracalny; wyraźnie większe wartości świadczą o kinetyce
+        quasi-odwracalnej lub nieodwracalnej, często związanej z wolnym transferem elektronu.
+        W praktyce na ΔEp wpływa też opór roztworu (spadek omowy iR), co może zawyżać
+        obserwowaną wartość.</p>
+        """,
+
+        "theory_tab2_title_pl": "Linia bazowa",
+        "theory_tab2_html_pl": """
+        <h3>Dlaczego korekcja linii bazowej jest konieczna</h3>
+        <p>Zmierzony prąd piku to suma prądu faradajowskiego (reakcja redoks) oraz
+        prądu tła — pojemnościowego ładowania podwójnej warstwy i prądów
+        pochodzących od rozpuszczalnika/elektrolitu. Aby wyznaczyć prawdziwą
+        wysokość piku (<b>H</b>) musimy odjąć prąd tła.</p>
+
+        <h3>Jak prawidłowo wybrać punkty linii bazowej</h3>
+        <p>Standardowa metoda korekcji linii bazowej w CV polega na wybraniu
+        <b>obu</b> punktów na <b>liniowym fragmencie woltamogramu PRZED narastaniem
+        piku</b> — po <i>lewej</i> stronie piku, w obszarze, w którym prąd jeszcze
+        nie zaczął rosnąć na skutek reakcji redoks. Linia bazowa jest następnie
+        <b>ekstrapolowana</b> jako prosta pod pikiem, aby oszacować prąd tła
+        (niefaradajowski), który płynąłby, gdyby reakcja redoks nie zachodziła.</p>
+        <ul>
+            <li>Oba punkty (x<sub>1</sub>, y<sub>1</sub>) i (x<sub>2</sub>, y<sub>2</sub>)
+            umieść na <b>płaskim, liniowym odcinku</b> woltamogramu poprzedzającym pik —
+            tam, gdzie prąd zmienia się liniowo z potencjałem i nie ma jeszcze
+            aktywności faradajowskiej.</li>
+            <li>Prosta łącząca te dwa punkty reprezentuje prąd niefaradajowski
+            (ładowanie podwójnej warstwy, tło rozpuszczalnika/elektrolitu) —
+            jest ekstrapolowana pod pik do położenia E<sub>p</sub>.</li>
+            <li>Wysokość piku H to odległość od piku do tej ekstrapolowanej linii
+            w położeniu maksimum, a nie do prostej łączącej punkty po obu stronach piku.</li>
+            <li>Oba punkty powinny leżeć na tej samej gałęzi woltamogramu
+            (narastającej lub opadającej) i wystarczająco blisko siebie, aby
+            zachować lokalne nachylenie tła.</li>
+            <li>W CVision możesz wybrać punkty dwukrotnym kliknięciem lub edytować
+            numerycznie w oknie „Edytuj linię bazową".</li>
+        </ul>
+
+        <h3>Wpływ złego doboru linii bazowej</h3>
+        <ul>
+            <li><b>Punkty po obu stronach piku</b> — linia przecina pik zamiast stanowić
+            jego tło; wysokość H jest zaniżona, a jej wartość zależy arbitralnie od
+            wybranego zakresu.</li>
+            <li><b>Punkt w obszarze narastania piku</b> — ekstrapolacja jest nienaturalnie
+            skośna, pozorny pik lub brak piku.</li>
+            <li><b>Zbyt szeroki zakres obejmujący inne procesy</b> — nachylenie prostej
+            zaburzone przez sąsiedni pik, H zawyżone lub zaniżone.</li>
+            <li><b>Zbyt krótki odcinek liniowy</b> — punkty podatne na szum, duża
+            niepewność ekstrapolacji.</li>
+        </ul>
+        <p>Dobra praktyka: zawsze wizualnie zweryfikuj, czy ekstrapolowana linia
+        bazowa biegnie naturalnie pod pikiem, przed odczytem parametrów piku.</p>
+        """,
+
+        "theory_tab3_title_pl": "Parametry piku",
+        "theory_tab3_html_pl": """
+        <h3>Wysokość (H) i głębokość (D) piku</h3>
+        <p>Wysokość piku anodowego <b>H = i<sub>p,a</sub> − i<sub>baseline</sub>(E<sub>p,a</sub>)</b>
+        to odległość maksimum od linii bazowej w jego położeniu. Analogicznie
+        głębokość piku katodowego <b>D = i<sub>baseline</sub>(E<sub>p,c</sub>) − i<sub>p,c</sub></b>.
+        Obie wielkości są dodatnie i wyrażone w μA (lub — po kalibracji — w μA/cm²,
+        μA/mM, μA/(cm²·mM)).</p>
+
+        <h3>Stosunek prądów i<sub>p,a</sub> / i<sub>p,c</sub></h3>
+        <p>Stosunek wysokości piku anodowego do katodowego informuje o odwracalności
+        procesu elektrochemicznego:</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>i<sub>p,a</sub> / i<sub>p,c</sub></th><th>Interpretacja</th></tr>
+            <tr><td>≈ 1,0</td><td>Proces odwracalny (forma utleniona i zredukowana stabilne)</td></tr>
+            <tr><td>&lt; 1 lub &gt; 1</td><td>Proces quasi-odwracalny lub sprzężona reakcja chemiczna</td></tr>
+            <tr><td>brak jednego z pików</td><td>Proces nieodwracalny</td></tr>
+        </table>
+
+        <h3>Równanie Randlesa-Ševčíka</h3>
+        <p>Dla procesu odwracalnego, kontrolowanego dyfuzją, prąd piku wynosi:</p>
+        <p style="margin-left:2em;"><b>i<sub>p</sub> = 0,4463 · n · F · A · C · √(n · F · v · D / (R · T))</b></p>
+        <p>W 25 °C upraszcza się do i<sub>p</sub> = (2,69·10⁵) · n<sup>3/2</sup> · A · C · √(D · v).</p>
+        <p><b>Znaczenie symboli:</b></p>
+        <ul>
+            <li><b>i<sub>p</sub></b> — prąd piku [A]</li>
+            <li><b>n</b> — liczba elektronów biorących udział w reakcji</li>
+            <li><b>F</b> — stała Faradaya (96 485 C/mol)</li>
+            <li><b>A</b> — powierzchnia elektrody [cm²]</li>
+            <li><b>C</b> — stężenie analitu w roztworze [mol/cm³]</li>
+            <li><b>v</b> — szybkość skanowania potencjału [V/s]</li>
+            <li><b>D</b> — współczynnik dyfuzji analitu [cm²/s]</li>
+            <li><b>R</b> — stała gazowa (8,314 J/(mol·K))</li>
+            <li><b>T</b> — temperatura [K]</li>
+        </ul>
+        <p>Liniowa zależność i<sub>p</sub> od √v jest diagnostyką procesu
+        kontrolowanego dyfuzją.</p>
+        <p>Ponieważ prąd piku i<sub>p</sub> jest wprost proporcjonalny do stężenia analitu C
+        (zgodnie z równaniem Randlesa-Ševčíka), wysokość piku stanowi podstawę ilościowego
+        oznaczania stężenia metodą krzywej kalibracyjnej.</p>
+
+        <h3>Automatyczne wykrywanie pików</h3>
+        <p>Program może automatycznie lokalizować piki metodą <b>find_peaks</b>, wykrywającą
+        lokalne maksima/minima spełniające kryteria minimalnej wysokości i minimalnej odległości
+        między pikami. Różni się to od ręcznego wyznaczania parametrów piku przez linię bazową:
+        automatyczna detekcja szybko wskazuje położenie pików, natomiast dokładne parametry
+        (wysokość względem tła, baseline) wyznacza się metodą linii bazowej. Kryteria minimalnej
+        wysokości i odległości służą do odfiltrowania szumu i nieistotnych lokalnych ekstremów.</p>
+        """,
+
+        "theory_tab4_title_pl": "Pochodne i miejsca zerowe",
+        "theory_tab4_html_pl": """
+        <h3>Po co obliczać pochodną woltamogramu</h3>
+        <p>Pochodne pomagają precyzyjnie zlokalizować cechy woltamogramu niewidoczne
+        „gołym okiem" na surowym sygnale — szczególnie gdy piki są słabo
+        rozdzielone, asymetryczne, lub proces jest nieodwracalny.</p>
+
+        <h3>Pierwsza pochodna dI/dE</h3>
+        <ul>
+            <li>Miejsce zerowe pierwszej pochodnej odpowiada ekstremum prądu:
+            <b>dI/dE = 0</b> → maksimum (pik utleniania) lub minimum (pik redukcji).</li>
+            <li>Pozwala znaleźć dokładne E<sub>p</sub> bez wizualnego odgadywania.</li>
+        </ul>
+
+        <h3>Druga pochodna d²I/dE²</h3>
+        <ul>
+            <li>Miejsca zerowe drugiej pochodnej oznaczają punkty przegięcia krzywej CV —
+            przydatne dla procesów <b>nieodwracalnych</b>, gdzie klasyczny pik nie tworzy
+            wyraźnego maksimum (np. elektroutlenianie organiki).</li>
+            <li>Pozwala oszacować potencjał półfalowy nawet przy braku piku redukcyjnego.</li>
+        </ul>
+
+        <h3>Wygładzanie Savitzky-Golay</h3>
+        <p>Pochodne wzmacniają szum. Przed ich obliczaniem warto wygładzić sygnał filtrem
+        Savitzky-Golay, który lokalnie dopasowuje wielomian niskiego stopnia metodą
+        najmniejszych kwadratów, zachowując kształt piku lepiej niż średnia krocząca.</p>
+        <p><b>Dobór parametrów:</b></p>
+        <ul>
+            <li><b>Okno</b> (liczba nieparzysta): im większe, tym silniejsze wygładzanie,
+            ale ryzyko spłaszczenia piku. W praktyce 7–15 punktów dla typowego CV.</li>
+            <li><b>Stopień wielomianu</b>: 2 lub 3 dla typowych kształtów, 4–5 dla
+            bardziej złożonych sygnałów. Musi być <b>mniejszy</b> niż okno.</li>
+            <li>Złota zasada: zwiększaj okno tylko na tyle, aby usunąć szum, i sprawdź,
+            czy amplituda piku nie spada.</li>
+        </ul>
+        """,
+
+        "theory_tab5_title_pl": "Dopasowanie krzywych",
+        "theory_tab5_html_pl": """
+        <h3>Kiedy stosować Gaussa, a kiedy Lorentza</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Model</th><th>Kształt</th><th>Zastosowanie</th></tr>
+            <tr><td>Gaussowski</td>
+                <td>szybko opadające ogony (exp(−x²))</td>
+                <td>piki w miarę symetryczne, o wąskich ogonach</td></tr>
+            <tr><td>Lorentzowski</td>
+                <td>wolno opadające, szerokie ogony (1/(1+x²))</td>
+                <td>piki z szerszymi ogonami/skrzydłami</td></tr>
+            <tr><td>Asymetryczny Gaussowski</td>
+                <td>różne σ z dwóch stron centrum</td>
+                <td>piki wyraźnie niesymetryczne</td></tr>
+        </table>
+        <p>Modele te są funkcjami dopasowania matematycznego do wyznaczenia parametrów piku
+        (FWHM, centrum, amplituda); wybór modelu to kwestia jakości dopasowania kształtu,
+        nie interpretacji mechanizmu elektrodowego.</p>
+
+        <h3>FWHM — szerokość połówkowa</h3>
+        <p><b>FWHM</b> (Full Width at Half Maximum) to szerokość piku na wysokości
+        równej połowie jego amplitudy. Wzory modelowe:</p>
+        <ul>
+            <li>Gauss: <b>FWHM = 2·√(2·ln2)·σ ≈ 2,3548·σ</b></li>
+            <li>Lorentz: <b>FWHM = 2·γ</b></li>
+            <li>Asymetryczny Gauss: <b>FWHM = √(2·ln2)·(σ<sub>L</sub> + σ<sub>R</sub>)</b></li>
+        </ul>
+        <p>Dla procesu odwracalnego w 25 °C teoretyczna FWHM piku wynosi ≈ 90,6/n mV
+        (n — liczba elektronów). Znacznie szerszy pik świadczy o nieodwracalności lub
+        powolnym transporcie.</p>
+
+        <h3>Asymetria piku</h3>
+        <p>Współczynnik <b>asymetrii = σ<sub>prawa</sub> / σ<sub>lewa</sub></b>:</p>
+        <ul>
+            <li><b>≈ 1,0</b> — pik symetryczny.</li>
+            <li><b>&gt; 1</b> — prawa strona piku szersza.</li>
+            <li><b>&lt; 1</b> — lewa strona piku szersza.</li>
+        </ul>
+        <p>Kierunek i stopień asymetrii mogą sygnalizować odstępstwa od idealnego,
+        symetrycznego kształtu piku; ich interpretacja mechanistyczna wymaga jednak
+        dodatkowej wiedzy o układzie i nie wynika jednoznacznie z samego dopasowania.</p>
+
+        <h3>Współczynnik determinacji R²</h3>
+        <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> mierzy jaki procent zmienności
+        danych wyjaśnia model:</p>
+        <ul>
+            <li><b>R² &gt; 0,99</b> — dopasowanie bardzo dobre, model adekwatny.</li>
+            <li><b>0,95 – 0,99</b> — akceptowalne, ale warto sprawdzić inny model
+            lub zmniejszyć zakres dopasowania.</li>
+            <li><b>&lt; 0,95</b> — model niewłaściwy lub dane zaszumione; rozważ
+            wygładzanie lub model asymetryczny.</li>
+        </ul>
+        """,
+
+        "theory_tab6_title_pl": "Kalibracja jednostek",
+        "theory_tab6_html_pl": """
+        <h3>Normalizacja do powierzchni elektrody (standard publikacyjny)</h3>
+        <p>Prąd zarejestrowany na elektrodzie zależy liniowo od jej powierzchni
+        (patrz równanie Randlesa-Ševčíka). Porównywanie bezwzględnych wartości μA
+        z różnych elektrod jest bezsensowne. Dlatego w publikacjach elektrochemicznych
+        standardem jest <b>gęstość prądu j = i / A [μA/cm²]</b>.</p>
+
+        <h3>Wyznaczanie rzeczywistej powierzchni elektrody (ECSA)</h3>
+        <p><b>ECSA</b> (Electrochemically Active Surface Area) to powierzchnia faktycznie
+        dostępna dla reakcji, zwykle większa niż powierzchnia geometryczna dla elektrod
+        nanostrukturalnych. Typowe metody:</p>
+        <ul>
+            <li><b>Metoda Randlesa-Ševčíka:</b> wyznacz i<sub>p</sub> dla kilku szybkości
+            skanowania z wzorcem o znanym D i C (np. [Fe(CN)<sub>6</sub>]³⁻/⁴⁻),
+            dopasuj i<sub>p</sub> vs √v i oblicz A z nachylenia.</li>
+            <li><b>Metoda pojemnościowa (double-layer):</b> z CV bez aktywnych par
+            redoks oblicz pojemność C<sub>dl</sub> i podziel przez specyficzną pojemność
+            materiału (zwykle 20–60 μF/cm² dla metali).</li>
+            <li><b>Metoda utleniania H<sub>upd</sub></b> (dla Pt) — z ładunku pików
+            desorpcji wodoru, 210 μC/cm² dla Pt(111).</li>
+            <li><b>Metoda wzorca redoks</b> — z CV [Ru(NH<sub>3</sub>)<sub>6</sub>]³⁺ lub
+            ferrocenu o znanym współczynniku dyfuzji.</li>
+        </ul>
+
+        <h3>Normalizacja do stężenia — czujniki elektrochemiczne</h3>
+        <p>W analityce czujnikowej istotna jest <b>czułość na stężenie</b>, wyrażana
+        w μA/mM lub (po dodatkowej normalizacji) μA/(cm²·mM). Pozwala porównywać
+        różne konstrukcje czujników niezależnie od rozmiaru i stężenia kalibracyjnego.</p>
+
+        <h3>Przelicznik jednostek w CVision</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Sytuacja</th><th>Operacja</th><th>Jednostka wynikowa</th></tr>
+            <tr><td>Brak normalizacji</td><td>i</td><td>μA</td></tr>
+            <tr><td>Normalizuj względem A</td><td>i / A</td><td>μA/cm²</td></tr>
+            <tr><td>Normalizuj względem c</td><td>i / c</td><td>μA/mM</td></tr>
+            <tr><td>Obie normalizacje</td><td>i / (A · c)</td><td>μA/(cm²·mM)</td></tr>
+        </table>
+        <p><b>Przykład:</b> pik o wysokości 168,175 μA dla elektrody o A = 0,071 cm²
+        daje 168,175 / 0,071 ≈ <b>2368,66 μA/cm²</b>. Tę wartość można porównywać
+        z literaturą niezależnie od wielkości elektrody.</p>
+        """,
     },
     "en": {
         "window_title": "CVision: Cyclic Voltammogram Analysis",
@@ -606,6 +887,289 @@ TRANSLATIONS = {
             • The "Theory" tab in the top toolbar — an extensive theoretical handbook.</p>
         </body>
         </html>
+        """,
+
+        "dlg_theory_title": "Theory — handbook",
+
+        "theory_tab1_title_en": "Cyclic voltammetry",
+        "theory_tab1_html_en": """
+        <h3>Cyclic voltammetry (CV)</h3>
+        <p><b>What is CV?</b> Cyclic voltammetry is an electroanalytical technique in
+        which the potential of the working electrode is swept linearly in time between
+        two limiting values and then reversed — forming a cycle. At the same time,
+        the current flowing through the electrode is recorded.</p>
+
+        <h3>Operating principle</h3>
+        <p>The potentiostat imposes a defined potential on the working electrode relative
+        to the reference electrode, and measures the current between the working electrode
+        and the auxiliary (counter) electrode. The change in potential drives oxidation
+        (on the rising branch) and reduction (on the falling branch) of the electroactive
+        species.</p>
+
+        <h3>Reading a voltammogram</h3>
+        <ul>
+            <li><b>X axis — potential E [mV or V]:</b> the imposed electrochemical driving force.</li>
+            <li><b>Y axis — current I [μA]:</b> the system's response. IUPAC convention:
+            anodic currents (oxidation) are positive, cathodic currents (reduction) are negative.</li>
+        </ul>
+
+        <h3>Oxidation and reduction peaks</h3>
+        <p>The <b>anodic peak (ip,a)</b> appears during the forward scan toward more
+        positive potentials and corresponds to oxidation of the analyte at the electrode.
+        The <b>cathodic peak (ip,c)</b> appears during the reverse scan and corresponds to
+        reduction of the oxidation product. The presence of both peaks indicates a process
+        that is at least quasi-reversible.</p>
+
+        <h3>Half-wave potential E½</h3>
+        <p>For a reversible process, E½ is defined as the arithmetic mean of the anodic
+        and cathodic peak potentials:</p>
+        <p style="margin-left:2em;"><b>E½ = (E<sub>p,a</sub> + E<sub>p,c</sub>) / 2</b></p>
+        <p>E½ is close to the formal redox potential and characterizes a given redox
+        couple independently of the scan rate (for a reversible process).</p>
+
+        <h3>ΔEp — peak-to-peak separation</h3>
+        <p>ΔEp is the absolute difference between the anodic (oxidation) and cathodic
+        (reduction) peak potentials:</p>
+        <p style="margin-left:2em;"><b>ΔEp = |E<sub>p,a</sub> − E<sub>p,c</sub>|</b></p>
+        <p>ΔEp is the primary criterion for the reversibility of a redox couple. For a
+        reversible, one-electron process at 25 °C, the theoretical value is
+        <b>ΔEp ≈ 59/n mV</b>, where n is the number of electrons transferred. ΔEp values
+        close to 59/n mV indicate a reversible process; markedly larger values point to
+        quasi-reversible or irreversible kinetics, often associated with slow electron
+        transfer. In practice, ΔEp is also affected by solution resistance — the ohmic
+        (iR) drop — which can inflate the observed value.</p>
+        """,
+
+        "theory_tab2_title_en": "Linia bazowa",
+        "theory_tab2_html_en": """
+        <h3>Dlaczego korekcja linii bazowej jest konieczna</h3>
+        <p>Zmierzony prąd piku to suma prądu faradajowskiego (reakcja redoks) oraz
+        prądu tła — pojemnościowego ładowania podwójnej warstwy i prądów
+        pochodzących od rozpuszczalnika/elektrolitu. Aby wyznaczyć prawdziwą
+        wysokość piku (<b>H</b>) musimy odjąć prąd tła.</p>
+
+        <h3>Jak prawidłowo wybrać punkty linii bazowej</h3>
+        <p>Standardowa metoda korekcji linii bazowej w CV polega na wybraniu
+        <b>obu</b> punktów na <b>liniowym fragmencie woltamogramu PRZED narastaniem
+        piku</b> — po <i>lewej</i> stronie piku, w obszarze, w którym prąd jeszcze
+        nie zaczął rosnąć na skutek reakcji redoks. Linia bazowa jest następnie
+        <b>ekstrapolowana</b> jako prosta pod pikiem, aby oszacować prąd tła
+        (niefaradajowski), który płynąłby, gdyby reakcja redoks nie zachodziła.</p>
+        <ul>
+            <li>Oba punkty (x<sub>1</sub>, y<sub>1</sub>) i (x<sub>2</sub>, y<sub>2</sub>)
+            umieść na <b>płaskim, liniowym odcinku</b> woltamogramu poprzedzającym pik —
+            tam, gdzie prąd zmienia się liniowo z potencjałem i nie ma jeszcze
+            aktywności faradajowskiej.</li>
+            <li>Prosta łącząca te dwa punkty reprezentuje prąd niefaradajowski
+            (ładowanie podwójnej warstwy, tło rozpuszczalnika/elektrolitu) —
+            jest ekstrapolowana pod pik do położenia E<sub>p</sub>.</li>
+            <li>Wysokość piku H to odległość od piku do tej ekstrapolowanej linii
+            w położeniu maksimum, a nie do prostej łączącej punkty po obu stronach piku.</li>
+            <li>Oba punkty powinny leżeć na tej samej gałęzi woltamogramu
+            (narastającej lub opadającej) i wystarczająco blisko siebie, aby
+            zachować lokalne nachylenie tła.</li>
+            <li>W CVision możesz wybrać punkty dwukrotnym kliknięciem lub edytować
+            numerycznie w oknie „Edytuj linię bazową".</li>
+        </ul>
+
+        <h3>Wpływ złego doboru linii bazowej</h3>
+        <ul>
+            <li><b>Punkty po obu stronach piku</b> — linia przecina pik zamiast stanowić
+            jego tło; wysokość H jest zaniżona, a jej wartość zależy arbitralnie od
+            wybranego zakresu.</li>
+            <li><b>Punkt w obszarze narastania piku</b> — ekstrapolacja jest nienaturalnie
+            skośna, pozorny pik lub brak piku.</li>
+            <li><b>Zbyt szeroki zakres obejmujący inne procesy</b> — nachylenie prostej
+            zaburzone przez sąsiedni pik, H zawyżone lub zaniżone.</li>
+            <li><b>Zbyt krótki odcinek liniowy</b> — punkty podatne na szum, duża
+            niepewność ekstrapolacji.</li>
+        </ul>
+        <p>Dobra praktyka: zawsze wizualnie zweryfikuj, czy ekstrapolowana linia
+        bazowa biegnie naturalnie pod pikiem, przed odczytem parametrów piku.</p>
+        """,
+
+        "theory_tab3_title_en": "Parametry piku",
+        "theory_tab3_html_en": """
+        <h3>Wysokość (H) i głębokość (D) piku</h3>
+        <p>Wysokość piku anodowego <b>H = i<sub>p,a</sub> − i<sub>baseline</sub>(E<sub>p,a</sub>)</b>
+        to odległość maksimum od linii bazowej w jego położeniu. Analogicznie
+        głębokość piku katodowego <b>D = i<sub>baseline</sub>(E<sub>p,c</sub>) − i<sub>p,c</sub></b>.
+        Obie wielkości są dodatnie i wyrażone w μA (lub — po kalibracji — w μA/cm²,
+        μA/mM, μA/(cm²·mM)).</p>
+
+        <h3>Stosunek prądów i<sub>p,a</sub> / i<sub>p,c</sub></h3>
+        <p>Stosunek wysokości piku anodowego do katodowego informuje o odwracalności
+        procesu elektrochemicznego:</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>i<sub>p,a</sub> / i<sub>p,c</sub></th><th>Interpretacja</th></tr>
+            <tr><td>≈ 1,0</td><td>Proces odwracalny (forma utleniona i zredukowana stabilne)</td></tr>
+            <tr><td>&lt; 1 lub &gt; 1</td><td>Proces quasi-odwracalny lub sprzężona reakcja chemiczna</td></tr>
+            <tr><td>brak jednego z pików</td><td>Proces nieodwracalny</td></tr>
+        </table>
+
+        <h3>Równanie Randlesa-Ševčíka</h3>
+        <p>Dla procesu odwracalnego, kontrolowanego dyfuzją, prąd piku wynosi:</p>
+        <p style="margin-left:2em;"><b>i<sub>p</sub> = 0,4463 · n · F · A · C · √(n · F · v · D / (R · T))</b></p>
+        <p>W 25 °C upraszcza się do i<sub>p</sub> = (2,69·10⁵) · n<sup>3/2</sup> · A · C · √(D · v).</p>
+        <p><b>Znaczenie symboli:</b></p>
+        <ul>
+            <li><b>i<sub>p</sub></b> — prąd piku [A]</li>
+            <li><b>n</b> — liczba elektronów biorących udział w reakcji</li>
+            <li><b>F</b> — stała Faradaya (96 485 C/mol)</li>
+            <li><b>A</b> — powierzchnia elektrody [cm²]</li>
+            <li><b>C</b> — stężenie analitu w roztworze [mol/cm³]</li>
+            <li><b>v</b> — szybkość skanowania potencjału [V/s]</li>
+            <li><b>D</b> — współczynnik dyfuzji analitu [cm²/s]</li>
+            <li><b>R</b> — stała gazowa (8,314 J/(mol·K))</li>
+            <li><b>T</b> — temperatura [K]</li>
+        </ul>
+        <p>Liniowa zależność i<sub>p</sub> od √v jest diagnostyką procesu
+        kontrolowanego dyfuzją.</p>
+        <p>Ponieważ prąd piku i<sub>p</sub> jest wprost proporcjonalny do stężenia analitu C
+        (zgodnie z równaniem Randlesa-Ševčíka), wysokość piku stanowi podstawę ilościowego
+        oznaczania stężenia metodą krzywej kalibracyjnej.</p>
+
+        <h3>Automatyczne wykrywanie pików</h3>
+        <p>Program może automatycznie lokalizować piki metodą <b>find_peaks</b>, wykrywającą
+        lokalne maksima/minima spełniające kryteria minimalnej wysokości i minimalnej odległości
+        między pikami. Różni się to od ręcznego wyznaczania parametrów piku przez linię bazową:
+        automatyczna detekcja szybko wskazuje położenie pików, natomiast dokładne parametry
+        (wysokość względem tła, baseline) wyznacza się metodą linii bazowej. Kryteria minimalnej
+        wysokości i odległości służą do odfiltrowania szumu i nieistotnych lokalnych ekstremów.</p>
+        """,
+
+        "theory_tab4_title_en": "Pochodne i miejsca zerowe",
+        "theory_tab4_html_en": """
+        <h3>Po co obliczać pochodną woltamogramu</h3>
+        <p>Pochodne pomagają precyzyjnie zlokalizować cechy woltamogramu niewidoczne
+        „gołym okiem" na surowym sygnale — szczególnie gdy piki są słabo
+        rozdzielone, asymetryczne, lub proces jest nieodwracalny.</p>
+
+        <h3>Pierwsza pochodna dI/dE</h3>
+        <ul>
+            <li>Miejsce zerowe pierwszej pochodnej odpowiada ekstremum prądu:
+            <b>dI/dE = 0</b> → maksimum (pik utleniania) lub minimum (pik redukcji).</li>
+            <li>Pozwala znaleźć dokładne E<sub>p</sub> bez wizualnego odgadywania.</li>
+        </ul>
+
+        <h3>Druga pochodna d²I/dE²</h3>
+        <ul>
+            <li>Miejsca zerowe drugiej pochodnej oznaczają punkty przegięcia krzywej CV —
+            przydatne dla procesów <b>nieodwracalnych</b>, gdzie klasyczny pik nie tworzy
+            wyraźnego maksimum (np. elektroutlenianie organiki).</li>
+            <li>Pozwala oszacować potencjał półfalowy nawet przy braku piku redukcyjnego.</li>
+        </ul>
+
+        <h3>Wygładzanie Savitzky-Golay</h3>
+        <p>Pochodne wzmacniają szum. Przed ich obliczaniem warto wygładzić sygnał filtrem
+        Savitzky-Golay, który lokalnie dopasowuje wielomian niskiego stopnia metodą
+        najmniejszych kwadratów, zachowując kształt piku lepiej niż średnia krocząca.</p>
+        <p><b>Dobór parametrów:</b></p>
+        <ul>
+            <li><b>Okno</b> (liczba nieparzysta): im większe, tym silniejsze wygładzanie,
+            ale ryzyko spłaszczenia piku. W praktyce 7–15 punktów dla typowego CV.</li>
+            <li><b>Stopień wielomianu</b>: 2 lub 3 dla typowych kształtów, 4–5 dla
+            bardziej złożonych sygnałów. Musi być <b>mniejszy</b> niż okno.</li>
+            <li>Złota zasada: zwiększaj okno tylko na tyle, aby usunąć szum, i sprawdź,
+            czy amplituda piku nie spada.</li>
+        </ul>
+        """,
+
+        "theory_tab5_title_en": "Dopasowanie krzywych",
+        "theory_tab5_html_en": """
+        <h3>Kiedy stosować Gaussa, a kiedy Lorentza</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Model</th><th>Kształt</th><th>Zastosowanie</th></tr>
+            <tr><td>Gaussowski</td>
+                <td>szybko opadające ogony (exp(−x²))</td>
+                <td>piki w miarę symetryczne, o wąskich ogonach</td></tr>
+            <tr><td>Lorentzowski</td>
+                <td>wolno opadające, szerokie ogony (1/(1+x²))</td>
+                <td>piki z szerszymi ogonami/skrzydłami</td></tr>
+            <tr><td>Asymetryczny Gaussowski</td>
+                <td>różne σ z dwóch stron centrum</td>
+                <td>piki wyraźnie niesymetryczne</td></tr>
+        </table>
+        <p>Modele te są funkcjami dopasowania matematycznego do wyznaczenia parametrów piku
+        (FWHM, centrum, amplituda); wybór modelu to kwestia jakości dopasowania kształtu,
+        nie interpretacji mechanizmu elektrodowego.</p>
+
+        <h3>FWHM — szerokość połówkowa</h3>
+        <p><b>FWHM</b> (Full Width at Half Maximum) to szerokość piku na wysokości
+        równej połowie jego amplitudy. Wzory modelowe:</p>
+        <ul>
+            <li>Gauss: <b>FWHM = 2·√(2·ln2)·σ ≈ 2,3548·σ</b></li>
+            <li>Lorentz: <b>FWHM = 2·γ</b></li>
+            <li>Asymetryczny Gauss: <b>FWHM = √(2·ln2)·(σ<sub>L</sub> + σ<sub>R</sub>)</b></li>
+        </ul>
+        <p>Dla procesu odwracalnego w 25 °C teoretyczna FWHM piku wynosi ≈ 90,6/n mV
+        (n — liczba elektronów). Znacznie szerszy pik świadczy o nieodwracalności lub
+        powolnym transporcie.</p>
+
+        <h3>Asymetria piku</h3>
+        <p>Współczynnik <b>asymetrii = σ<sub>prawa</sub> / σ<sub>lewa</sub></b>:</p>
+        <ul>
+            <li><b>≈ 1,0</b> — pik symetryczny.</li>
+            <li><b>&gt; 1</b> — prawa strona piku szersza.</li>
+            <li><b>&lt; 1</b> — lewa strona piku szersza.</li>
+        </ul>
+        <p>Kierunek i stopień asymetrii mogą sygnalizować odstępstwa od idealnego,
+        symetrycznego kształtu piku; ich interpretacja mechanistyczna wymaga jednak
+        dodatkowej wiedzy o układzie i nie wynika jednoznacznie z samego dopasowania.</p>
+
+        <h3>Współczynnik determinacji R²</h3>
+        <p><b>R² = 1 − SS<sub>res</sub>/SS<sub>tot</sub></b> mierzy jaki procent zmienności
+        danych wyjaśnia model:</p>
+        <ul>
+            <li><b>R² &gt; 0,99</b> — dopasowanie bardzo dobre, model adekwatny.</li>
+            <li><b>0,95 – 0,99</b> — akceptowalne, ale warto sprawdzić inny model
+            lub zmniejszyć zakres dopasowania.</li>
+            <li><b>&lt; 0,95</b> — model niewłaściwy lub dane zaszumione; rozważ
+            wygładzanie lub model asymetryczny.</li>
+        </ul>
+        """,
+
+        "theory_tab6_title_en": "Kalibracja jednostek",
+        "theory_tab6_html_en": """
+        <h3>Normalizacja do powierzchni elektrody (standard publikacyjny)</h3>
+        <p>Prąd zarejestrowany na elektrodzie zależy liniowo od jej powierzchni
+        (patrz równanie Randlesa-Ševčíka). Porównywanie bezwzględnych wartości μA
+        z różnych elektrod jest bezsensowne. Dlatego w publikacjach elektrochemicznych
+        standardem jest <b>gęstość prądu j = i / A [μA/cm²]</b>.</p>
+
+        <h3>Wyznaczanie rzeczywistej powierzchni elektrody (ECSA)</h3>
+        <p><b>ECSA</b> (Electrochemically Active Surface Area) to powierzchnia faktycznie
+        dostępna dla reakcji, zwykle większa niż powierzchnia geometryczna dla elektrod
+        nanostrukturalnych. Typowe metody:</p>
+        <ul>
+            <li><b>Metoda Randlesa-Ševčíka:</b> wyznacz i<sub>p</sub> dla kilku szybkości
+            skanowania z wzorcem o znanym D i C (np. [Fe(CN)<sub>6</sub>]³⁻/⁴⁻),
+            dopasuj i<sub>p</sub> vs √v i oblicz A z nachylenia.</li>
+            <li><b>Metoda pojemnościowa (double-layer):</b> z CV bez aktywnych par
+            redoks oblicz pojemność C<sub>dl</sub> i podziel przez specyficzną pojemność
+            materiału (zwykle 20–60 μF/cm² dla metali).</li>
+            <li><b>Metoda utleniania H<sub>upd</sub></b> (dla Pt) — z ładunku pików
+            desorpcji wodoru, 210 μC/cm² dla Pt(111).</li>
+            <li><b>Metoda wzorca redoks</b> — z CV [Ru(NH<sub>3</sub>)<sub>6</sub>]³⁺ lub
+            ferrocenu o znanym współczynniku dyfuzji.</li>
+        </ul>
+
+        <h3>Normalizacja do stężenia — czujniki elektrochemiczne</h3>
+        <p>W analityce czujnikowej istotna jest <b>czułość na stężenie</b>, wyrażana
+        w μA/mM lub (po dodatkowej normalizacji) μA/(cm²·mM). Pozwala porównywać
+        różne konstrukcje czujników niezależnie od rozmiaru i stężenia kalibracyjnego.</p>
+
+        <h3>Przelicznik jednostek w CVision</h3>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><th>Sytuacja</th><th>Operacja</th><th>Jednostka wynikowa</th></tr>
+            <tr><td>Brak normalizacji</td><td>i</td><td>μA</td></tr>
+            <tr><td>Normalizuj względem A</td><td>i / A</td><td>μA/cm²</td></tr>
+            <tr><td>Normalizuj względem c</td><td>i / c</td><td>μA/mM</td></tr>
+            <tr><td>Obie normalizacje</td><td>i / (A · c)</td><td>μA/(cm²·mM)</td></tr>
+        </table>
+        <p><b>Przykład:</b> pik o wysokości 168,175 μA dla elektrody o A = 0,071 cm²
+        daje 168,175 / 0,071 ≈ <b>2368,66 μA/cm²</b>. Tę wartość można porównywać
+        z literaturą niezależnie od wielkości elektrody.</p>
         """,
     },
 }
