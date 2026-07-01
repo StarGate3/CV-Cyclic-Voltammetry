@@ -3,8 +3,9 @@ Moduł translations.py
 ----------------------
 Słowniki tłumaczeń UI (PL/EN). Czysty moduł danych — brak zależności od Qt ani od reszty
 programu. Etap 0: klucze toolbara (trzy rzędy, w tym Help/Teoria/About jako zwykłe
-przyciski), obu combo (motyw, pomiar) i tytułu okna. Kolejne etapy dołożą resztę kluczy
-(etykiety, nagłówki tabeli, osie, dialogi, treść Help/Teoria/About).
+przyciski), obu combo (motyw, pomiar) i tytułu okna. Etap 1a: etykiety Okno/Stopień,
+nagłówki tabeli wyników, tytuł wykresu i domyślne etykiety osi. Kolejne etapy dołożą
+resztę kluczy (dialogi, komunikaty błędów, treść Help/Teoria/About).
 """
 
 TRANSLATIONS = {
@@ -37,6 +38,18 @@ TRANSLATIONS = {
         "combo_theme_light": "Jasny",
 
         "label_language": "Język",
+
+        "label_window": "Okno:",
+        "label_polyorder": "Stopień:",
+        "plot_title": "Woltamogram",
+        "axis_x": "E [mV]",
+        "axis_y_current": "Prąd",
+
+        "col_type": "Typ",
+        "col_xpeak": "x_peak",
+        "col_ypeak": "y_peak",
+        "col_baseline": "Baseline",
+        "col_hd": "H/D",
     },
     "en": {
         "window_title": "CVision: Cyclic Voltammogram Analysis",
@@ -67,5 +80,17 @@ TRANSLATIONS = {
         "combo_theme_light": "Light",
 
         "label_language": "Language",
+
+        "label_window": "Window:",
+        "label_polyorder": "Order:",
+        "plot_title": "Voltammogram",
+        "axis_x": "E [mV]",
+        "axis_y_current": "Current",
+
+        "col_type": "Type",
+        "col_xpeak": "x_peak",
+        "col_ypeak": "y_peak",
+        "col_baseline": "Baseline",
+        "col_hd": "H/D",
     },
 }

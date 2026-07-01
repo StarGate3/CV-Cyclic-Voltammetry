@@ -35,7 +35,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.baseline_mode = None
         self.num_clicks = 0
         self.axis_settings = {
-            'x_label': 'E [mV]',
+            'x_label': self.tr_('axis_x'),
             'y_label': 'I [μA]',
             'x_min': 0,
             'x_max': 10,
@@ -95,7 +95,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_layout()
         self.resultsTable = QtWidgets.QTableWidget()
         self.resultsTable.setColumnCount(5)
-        self.resultsTable.setHorizontalHeaderLabels(["Typ", "x_peak", "y_peak", "Baseline", "H/D"])
+        self.resultsTable.setHorizontalHeaderLabels(
+            [self.tr_("col_type"), self.tr_("col_xpeak"), self.tr_("col_ypeak"),
+             self.tr_("col_baseline"), self.tr_("col_hd")]
+        )
         self.centralLayout.addWidget(self.resultsTable)
         self.setStatusBar(QtWidgets.QStatusBar())
         self.calibration_status_label = QtWidgets.QLabel("")
@@ -163,9 +166,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def _build_toolbar_row3(self, row):
         """Fills the third toolbar row: smoothing controls, theme, language, help/theory/about."""
         row.addWidget(self.smoothingCheckBox)
-        row.addWidget(QtWidgets.QLabel("Okno:"))
+        self.label_window = QtWidgets.QLabel("Okno:")
+        row.addWidget(self.label_window)
         row.addWidget(self.windowSpinBox)
-        row.addWidget(QtWidgets.QLabel("Stopień:"))
+        self.label_polyorder = QtWidgets.QLabel("Stopień:")
+        row.addWidget(self.label_polyorder)
         row.addWidget(self.polySpinBox)
         self.combo_theme = QtWidgets.QComboBox()
         self.combo_theme.addItems(["Ciemny", "Jasny"])
@@ -264,14 +269,25 @@ class MainWindow(QtWidgets.QMainWindow):
         combo.blockSignals(False)
 
     def retranslate_ui(self):
-        """Ustawia teksty wszystkich widżetów przetłumaczonych w Etapie 0, wg self.current_language.
+        """Ustawia teksty wszystkich widżetów przetłumaczonych do Etapu 1a, wg self.current_language.
 
         Etap 0: tytuł okna, 16 przycisków toolbara (rzędy 1-3), checkbox wygładzania,
-        pozycje obu combo (pomiar, motyw). Reszta interfejsu (etykiety Okno/Stopień,
-        nagłówki tabeli, osie, dialogi, treść Help/Teoria/About) zostaje nieprzetłumaczona
-        do kolejnych etapów.
+        pozycje obu combo (pomiar, motyw).
+        Etap 1a: etykiety „Okno:”/„Stopień:”, nagłówki tabeli wyników, tytuł wykresu.
+
+        UWAGA — etykiety osi (x_label/y_label w self.axis_settings) celowo NIE są tu
+        ustawiane. Są edytowalne przez użytkownika (AxisSettingsDialog) i w kodzie nie ma
+        żadnej flagi rozróżniającej „wartość domyślna” od „wartość ustawiona ręcznie” —
+        wymuszenie retłumaczenia tutaj nadpisywałoby ręczne ustawienia użytkownika przy
+        każdej zmianie języka. Zamiast tego domyślne etykiety osi są tłumaczone tylko przy
+        ich naturalnym (od)tworzeniu: self.tr_('axis_x') w konstruktorze (__init__) oraz
+        self.tr_('axis_y_current') w dynamicznym f"{...} [{jednostka}]" w
+        update_plot_from_raw_data()/on_calibration_confirmed(). Rozróżnienie default-vs-user
+        dla osi nie istnieje w kodzie i wymaga osobnej decyzji projektowej, jeśli ma być
+        w pełni poprawne przy przełączaniu języka.
         """
         self.setWindowTitle(self.tr_("window_title"))
+        self.plot_widget.setTitle(self.tr_("plot_title"))
 
         self.btn_open_file.setText(self.tr_("btn_open_file"))
         self.btn_baseline_edit.setText(self.tr_("btn_baseline_edit"))
@@ -289,6 +305,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_curve_fit.setText(self.tr_("btn_curve_fit"))
 
         self.smoothingCheckBox.setText(self.tr_("check_smoothing"))
+        self.label_window.setText(self.tr_("label_window"))
+        self.label_polyorder.setText(self.tr_("label_polyorder"))
         self.btn_help.setText(self.tr_("btn_help"))
         self.btn_theory.setText(self.tr_("btn_theory"))
         self.btn_about.setText(self.tr_("btn_about"))
@@ -298,6 +316,11 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self._set_combo_item_texts(
             self.combo_theme, [self.tr_("combo_theme_dark"), self.tr_("combo_theme_light")]
+        )
+
+        self.resultsTable.setHorizontalHeaderLabels(
+            [self.tr_("col_type"), self.tr_("col_xpeak"), self.tr_("col_ypeak"),
+             self.tr_("col_baseline"), self.tr_("col_hd")]
         )
 
     def open_file(self):
@@ -363,7 +386,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.y2 = self.raw_y2.copy()
         self.y1, self.current_unit_label = analysis.apply_calibration(self.y1, self.calibration_settings)
         self.y2, _ = analysis.apply_calibration(self.y2, self.calibration_settings)
-        self.axis_settings['y_label'] = f"Prąd [{self.current_unit_label}]"
+        self.axis_settings['y_label'] = f"{self.tr_('axis_y_current')} [{self.current_unit_label}]"
         self._refresh_calibration_status()
         if self.curve_oxidation is None:
             # First draw after a load or clear: rebuild the widget from scratch.
@@ -470,7 +493,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             # No data loaded yet: still refresh status label and Y axis preview.
             _, self.current_unit_label = analysis.apply_calibration(np.array([0.0]), settings)
-            self.axis_settings['y_label'] = f"Prąd [{self.current_unit_label}]"
+            self.axis_settings['y_label'] = f"{self.tr_('axis_y_current')} [{self.current_unit_label}]"
             self.update_axis_settings()
             self._refresh_calibration_status()
 
